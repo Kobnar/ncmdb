@@ -1,4 +1,5 @@
 from pyramid.config import Configurator
+from pyramid.renderers import JSON
 from sqlalchemy import engine_from_config
 
 from .resources import RootResource, PersonRowResource, PersonTableResource
@@ -24,5 +25,6 @@ def main(global_config, **settings):
     config.include('pyramid_chameleon')
     config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_route('home', '/')
+    config.add_renderer('json', JSON(indent=4))
     config.scan()
     return config.make_wsgi_app()
