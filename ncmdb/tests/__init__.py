@@ -20,6 +20,18 @@ class SQLiteTestCase(TestCase):
         DBSession.remove()
 
 
+NAMES = [
+    'Nicolas Cage',
+    'Nick Cage',
+    'Nic Cage',
+    'Nicolas Coppola',
+]
+
+
+FILMS = [
+]
+
+
 GOOD_URIS = [
     'https://upload.wikimedia.org/wikipedia/commons/3/33/Nicolas_Cage_2011_CC.jpg',
     'https://upload.wikimedia.org/wikipedia/commons/c/c0/Nicolas_Cage_Deauville_2013.jpg',
