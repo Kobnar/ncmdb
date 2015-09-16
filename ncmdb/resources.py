@@ -90,8 +90,11 @@ class TableResource(RootResource):
         if not filter_dict:
             filter_dict = {}
         query = self._db.query(self.table)
-        for field, value in filter_dict.items():
-            query = query.filter(getattr(self.table, field).like('%%%s%%' % value))
+        try:
+            for field, value in filter_dict.items():
+                query = query.filter(getattr(self.table, field).like('%%%s%%' % value))
+        except AttributeError:
+            return []
         return [x for x in query]
 
 
