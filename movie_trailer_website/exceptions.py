@@ -14,7 +14,7 @@ class ValidationError(Exception):
             self.msg = 'Invalid value for \'{}\': {}'.format(field, value)
 
     def __str__(self):
-        return repr(self.msg)
+        return str(self.msg)
 
     def __repr__(self):
         return repr(self.msg)

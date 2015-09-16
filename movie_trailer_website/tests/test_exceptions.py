@@ -21,4 +21,4 @@ class ValidationErrorTests(TestCase):
         self.assertEqual(self.expected_msg, str(self.error))
 
     def test_repr_set(self):
-        self.assertEqual(self.expected_msg, repr(self.error))
+        self.assertEqual(repr(self.expected_msg), repr(self.error))
