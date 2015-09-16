@@ -1,5 +1,24 @@
 __author__ = 'kobnar'
 
+from unittest import TestCase
+from sqlalchemy.orm import scoped_session, sessionmaker
+
+from ..models import Base
+
+
+DBSession = scoped_session(sessionmaker())
+
+
+class SQLiteTestCase(TestCase):
+    def setUp(self):
+        from sqlalchemy import create_engine
+        engine = create_engine('sqlite:///:memory:')
+        DBSession.configure(bind=engine)
+        Base.metadata.create_all(engine)
+
+    def tearDown(self):
+        DBSession.remove()
+
 
 GOOD_URIS = [
     'https://upload.wikimedia.org/wikipedia/commons/3/33/Nicolas_Cage_2011_CC.jpg',

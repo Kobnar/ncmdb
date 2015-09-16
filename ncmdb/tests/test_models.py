@@ -1,24 +1,7 @@
 __author__ = 'kobnar'
 from nose.plugins.attrib import attr
-from unittest import TestCase
-from sqlalchemy.orm import scoped_session, sessionmaker
 
-
-from ..models import Base
-
-
-DBSession = scoped_session(sessionmaker())
-
-
-class SQLiteTestCase(TestCase):
-    def setUp(self):
-        from sqlalchemy import create_engine
-        engine = create_engine('sqlite:///:memory:')
-        DBSession.configure(bind=engine)
-        Base.metadata.create_all(engine)
-
-    def tearDown(self):
-        DBSession.remove()
+from . import DBSession, SQLiteTestCase
 
 
 @attr('db')
