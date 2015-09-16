@@ -3,7 +3,7 @@ import os
 from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(here, 'README.txt')) as f:
+with open(os.path.join(here, 'README.md')) as f:
     README = f.read()
 with open(os.path.join(here, 'CHANGES.txt')) as f:
     CHANGES = f.read()
@@ -21,7 +21,7 @@ requires = [
     'nose',
     ]
 
-setup(name='movie_trailer_website',
+setup(name='ncmdb',
       version='0.0',
       description='A simple movie trailer website for Udacity\'s Full Stack Web'
                   'Developer Nanodegree using the Pyramid framework',
@@ -39,12 +39,12 @@ setup(name='movie_trailer_website',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
-      test_suite='movie_trailer_website',
+      test_suite='ncmdb',
       install_requires=requires,
       entry_points="""\
       [paste.app_factory]
-      main = movie_trailer_website:main
+      main = ncmdb:main
       [console_scripts]
-      initialize_movie_trailer_website_db = movie_trailer_website.scripts.initializedb:main
+      initialize_ncmdb_db = ncmdb.scripts.initializedb:main
       """,
       )

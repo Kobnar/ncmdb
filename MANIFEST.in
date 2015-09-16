@@ -1,2 +1,2 @@
 include *.txt *.ini *.cfg *.rst
-recursive-include movie_trailer_website *.ico *.png *.css *.gif *.jpg *.pt *.txt *.mak *.mako *.js *.html *.xml
+recursive-include ncmdb *.ico *.png *.css *.gif *.jpg *.pt *.txt *.mak *.mako *.js *.html *.xml
