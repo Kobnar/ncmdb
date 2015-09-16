@@ -61,6 +61,21 @@ class PersonTableResourceTests(PersonResourceTestCase):
         self.assertEqual(1, len(result))
         self.assertEqual('Nicolas Cage', result[0].name)
 
+    def test_retrieve_returns_filtered_substring(self):
+        """PersonTableResource.retrieve() returns a filtered list of people who match a partial string
+        """
+        query = {'name': 'Nick'}
+        result = self.table_resource.retrieve(query)
+        self.assertEqual(1, len(result))
+        self.assertEqual('Nick Cage', result[0].name)
+
+    def test_retrieve_invalid_substring_raises_attribute_error(self):
+        """PersonTableResource.retrieve() returns a filtered list of people who match a partial string
+        """
+        query = {'bad_field': 'Just plain bad.'}
+        with self.assertRaises(AttributeError):
+            self.table_resource.retrieve(query)
+
     def test_getitem_returns_row_resource(self):
         """PersonTableResource.__getitem__() returns a PersonRowResource for all entities
         """

@@ -89,7 +89,10 @@ class TableResource(RootResource):
     def retrieve(self, filter_dict=None):
         if not filter_dict:
             filter_dict = {}
-        return [x for x in self._db.query(self.table).filter_by(**filter_dict)]
+        query = self._db.query(self.table)
+        for field, value in filter_dict.items():
+            query = query.filter(getattr(self.table, field).like('%%%s%%' % value))
+        return [x for x in query]
 
 
 class PersonRowResource(RowResource):
