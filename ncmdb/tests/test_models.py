@@ -52,6 +52,10 @@ class TestPersonModel(SQLiteTestCase):
         with self.assertRaises(IntegrityError):
             DBSession.commit()
 
+    @attr('todo')
+    def test_serialize_works(self):
+        self.fail()
+
 
 @attr('db')
 class TestFilmModel(SQLiteTestCase):
@@ -167,6 +171,10 @@ class TestFilmModel(SQLiteTestCase):
 
     @attr('todo')
     def test_wiki_uri_field_raises_exception_with_invalid_uri(self):
+        self.fail()
+
+    @attr('todo')
+    def test_serialize(self):
         self.fail()
 
 

@@ -59,6 +59,20 @@ class Person(Base):
     name = Column(Text, unique=True)
     img_uri = Column(Text)
 
+    @property
+    def serialized(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'img_uri': self.img_uri,
+            'producer_credits': self.producer_credits,
+            'director_credits': self.director_credits,
+            'writer_credits': self.writer_credits,
+            'editor_credits': self.editor_credits,
+            'cast_credits': self.cast_credits,
+            'musician_credits': self.musician_credits
+        }
+
 
 class Film(Base):
     """
@@ -123,3 +137,18 @@ class Film(Base):
         if running_time < 0:
             raise ValidationError('running_time', running_time)
         self._running_time = running_time
+
+    @property
+    def serialized(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'year': self.year,
+            'running_time': self.running_time,
+            'producers': [p.name for p in self.producers],
+            'directors': [d.name for d in self.directors],
+            'writers': [w.name for w in self.writers],
+            'editors': [e.name for e in self.editors],
+            'cast': [c.name for c in self.editors],
+            'musicians': [m.name for m in self.musicians]
+        }
