@@ -119,6 +119,24 @@ WIKI_URIS = [
     'https://en.wikipedia.org/wiki/Wild_at_Heart_(film)',
     ]
 
+TRAILER_URIS = [
+    'https://www.youtube.com/watch?v=FKov1lmq_OU',
+    'https://www.youtube.com/watch?v=VSX4YgdKKMk',
+    'https://www.youtube.com/watch?v=7voEoWRKbAE',
+    'https://www.youtube.com/watch?v=Ye725hz386Y',
+    'https://www.youtube.com/watch?v=T7m4F5GlS5Q',
+    'https://www.youtube.com/watch?v=hfGwJGrLz2w',
+    'https://www.youtube.com/watch?v=I1vc2MdwTj8',
+    'https://www.youtube.com/watch?v=IahNwbcBdts',
+    'https://www.youtube.com/watch?v=2AIfVoGUs6c',
+    'https://www.youtube.com/watch?v=M01_2CKL6PU',
+    'https://www.youtube.com/watch?v=PnoSxO_2ghQ',
+    'https://www.youtube.com/watch?v=O90-DO9P6q0',
+    'https://www.youtube.com/watch?v=G85RB3NIfMA',
+    'https://www.youtube.com/watch?v=QCQwumNQL9E',
+    'https://www.youtube.com/watch?v=KoREt4C6l3k',
+]
+
 BAD_URIS = [
     'www.baduri.com'
     'ww.baduri.com',
@@ -126,7 +144,6 @@ BAD_URIS = [
     'http:/www.baduri.com/'
     'http://ww.baduri.com/',
     'http:/www.baduri.com/',
-    'http://wwwbaduri.com/'
     'baduri',
     'b^uri.X',
     ]
