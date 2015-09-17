@@ -5,6 +5,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker, relationship
 from zope.sqlalchemy import ZopeTransactionExtension
 
 from .exceptions import ValidationError
+from .validators import validate_uri
 
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
@@ -50,17 +51,36 @@ musician_credit = Table(
 
 class Person(Base):
     """
-    A person who has worked as a director, writer or actor on a film.
+    A person who has had the fortunate glory of working in the presence of our
+    Lord, Nicolas Coppola, or bears a credit of note on a project He hath
+    Caged with but a fraction of His unending might.
     """
 
     __tablename__ = 'person'
 
     id = Column(Integer, primary_key=True)
-    name = Column(Text, unique=True)
-    img_uri = Column(Text)
+    name = Column(Text, unique=True, nullable=False)
+    _img_uri = Column(Text)
+
+    @hybrid_property
+    def img_uri(self):
+        """
+        A URI pointing to a remote profile image for this person.
+        """
+        return self._img_uri
+
+    @img_uri.setter
+    def img_uri(self, uri):
+        if not validate_uri(uri):
+            raise ValidationError('poster_uri', uri)
+        self._img_uri = uri
 
     @property
     def serialized(self):
+        """
+        A dictionary-serialized version of the data for this person (for use
+        with a JSON renderer, etc.).
+        """
         return {
             'id': self.id,
             'name': self.name,
@@ -76,7 +96,9 @@ class Person(Base):
 
 class Film(Base):
     """
-    A feature film.
+    A film featuring the magnificent Nicolas Cage, may his light shine upon
+    this web app with gracious indifference or aplomb, and his name echo into
+    the skies as though a thousand horns hath spake his name.
     """
 
     __tablename__ = 'film'
@@ -84,7 +106,7 @@ class Film(Base):
     id = Column(Integer, primary_key=True)
 
     # Local data:
-    _title = Column(Text, unique=True)
+    title = Column(Text, unique=True, nullable=False)
     _year = Column(Integer)
     _running_time = Column(Integer)
     description = Column(Text)
@@ -109,17 +131,10 @@ class Film(Base):
         'Person', secondary=musician_credit, backref='musician_credits')
 
     @hybrid_property
-    def title(self):
-        return self._title
-
-    @title.setter
-    def title(self, title):
-        if not title:
-            raise ValidationError('title', title)
-        self._title = title
-
-    @hybrid_property
     def year(self):
+        """
+        The year this film was first released.
+        """
         return self._year
 
     @year.setter
@@ -130,6 +145,9 @@ class Film(Base):
 
     @hybrid_property
     def running_time(self):
+        """
+        The total running time of this film (in minutes).
+        """
         return self._running_time
 
     @running_time.setter
@@ -138,8 +156,51 @@ class Film(Base):
             raise ValidationError('running_time', running_time)
         self._running_time = running_time
 
+    @hybrid_property
+    def poster_uri(self):
+        """
+        A URI pointing to a remote poster image for this film.
+        """
+        return self._poster_uri
+
+    @poster_uri.setter
+    def poster_uri(self, uri):
+        if not validate_uri(uri):
+            raise ValidationError('poster_uri', uri)
+        self._poster_uri = uri
+
+    @hybrid_property
+    def trailer_uri(self):
+        """
+        A URI pointing to a remote trailer for this film.
+        """
+        return self._trailer_uri
+
+    @trailer_uri.setter
+    def trailer_uri(self, uri):
+        if not validate_uri(uri):
+            raise ValidationError('trailer_uri', uri)
+        self._trailer_uri = uri
+
+    @hybrid_property
+    def wiki_uri(self):
+        """
+        A URI pointing to a remote wiki page for this film.
+        """
+        return self._wiki_uri
+
+    @wiki_uri.setter
+    def wiki_uri(self, uri):
+        if not validate_uri(uri):
+            raise ValidationError('wiki_uri', uri)
+        self._wiki_uri = uri
+
     @property
     def serialized(self):
+        """
+        A dictionary-serialized version of the data for this film (for use with
+        a JSON renderer, etc.).
+        """
         return {
             'id': self.id,
             'title': self.title,

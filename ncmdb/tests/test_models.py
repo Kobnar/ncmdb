@@ -38,6 +38,16 @@ class TestPersonModel(SQLiteTestCase):
         DBSession.commit()
         self.assertEqual(2, beth_shue.id)
 
+    def test_name_required_index(self):
+        """Person.name raises IntegrityError if it is not set
+        """
+        from ..models import Person
+        from sqlalchemy.exc import IntegrityError
+        person = Person()
+        DBSession.add(person)
+        with self.assertRaises(IntegrityError):
+            DBSession.flush()
+
     def test_unique_name_index(self):
         """Person.name raises IntegrityError if a duplicate is saved to SQLite
         """
@@ -52,9 +62,52 @@ class TestPersonModel(SQLiteTestCase):
         with self.assertRaises(IntegrityError):
             DBSession.commit()
 
-    @attr('todo')
+    def test_img_uri_sets_valid_uri(self):
+        """Person.image_uri sets a valid URI without raising an exception
+        """
+        from ..models import Person
+        person = Person()
+        from . import PROFILE_URIS
+        from ..exceptions import ValidationError
+        for uri in PROFILE_URIS:
+            try:
+                person.img_uri = uri
+            except ValidationError:
+                self.fail('Validation error raised: %s' % uri)
+            self.assertEqual(uri, person.img_uri)
+
+    def test_img_uri_field_raises_exception_with_invalid_uri(self):
+        """Person.image_uri raises an exception with an invalid uri
+        """
+        from ..models import Person
+        person = Person()
+        from . import BAD_URIS
+        from ..exceptions import ValidationError
+        for uri in BAD_URIS:
+            with self.assertRaises(ValidationError):
+                person.img_uri = uri
+
     def test_serialize_works(self):
-        self.fail()
+        """Person.serialized returns a complete dict
+        """
+        fields = {
+            'name': 'Nicolas Cage',
+            'img_uri': 'https://upload.wikimedia.org/wikipedia/commons/3/33/Nicolas_Cage_2011_CC.jpg'
+        }
+        expected = {
+            'id': None,
+            'name': fields['name'],
+            'img_uri': fields['img_uri'],
+            'producer_credits': [],
+            'director_credits': [],
+            'writer_credits': [],
+            'editor_credits': [],
+            'cast_credits': [],
+            'musician_credits': [],
+        }
+        from ..models import Person
+        person = Person(**fields)
+        self.assertEqual(expected, person.serialized)
 
 
 @attr('db')
@@ -83,9 +136,11 @@ class TestFilmModel(SQLiteTestCase):
         """Film.title raises ValidationError if not set
         """
         from ..models import Film
-        from ..exceptions import ValidationError
-        with self.assertRaises(ValidationError):
-            film = Film()
+        from sqlalchemy.exc import IntegrityError
+        film = Film()
+        DBSession.add(film)
+        with self.assertRaises(IntegrityError):
+            DBSession.flush()
 
     def test_unique_title_index(self):
         """Film.title raises IntegrityError if a duplicate is saved to SQLite
@@ -149,33 +204,101 @@ class TestFilmModel(SQLiteTestCase):
         result = DBSession.query(Film).filter_by(id=leaving_lv.id).first()
         self.assertEqual(film_logline, result.description)
 
-    @attr('todo')
-    def test_poster_uri_field(self):
-        self.fail()
+    def test_poster_uri_sets_valid_uri(self):
+        """Film.poster_uri sets a valid URI without raising an exception
+        """
+        from ..models import Film
+        film = Film()
+        from . import POSTER_URIS
+        from ..exceptions import ValidationError
+        for uri in POSTER_URIS:
+            try:
+                film.poster_uri = uri
+            except ValidationError:
+                self.fail('Validation error raised: %s' % uri)
+            self.assertEqual(uri, film.poster_uri)
 
-    @attr('todo')
     def test_poster_uri_field_raises_exception_with_invalid_uri(self):
-        self.fail()
+        """Film.poster_uri raises an exception with an invalid uri
+        """
+        from ..models import Film
+        film = Film()
+        from . import BAD_URIS
+        from ..exceptions import ValidationError
+        for uri in BAD_URIS:
+            with self.assertRaises(ValidationError):
+                film.poster_uri = uri
 
-    @attr('todo')
-    def test_trailer_uri_field(self):
-        self.fail()
+    def test_trailer_uri_sets_valid_uri(self):
+        """Film.trailer_uri sets a valid URI without raising an exception
+        """
+        from ..models import Film
+        film = Film()
+        from . import TRAILER_URIS
+        from ..exceptions import ValidationError
+        for uri in TRAILER_URIS:
+            try:
+                film.trailer_uri = uri
+            except ValidationError:
+                self.fail('Validation error raised: %s' % uri)
+            self.assertEqual(uri, film.trailer_uri)
 
-    @attr('todo')
     def test_trailer_uri_field_raises_exception_with_invalid_uri(self):
-        self.fail()
+        """Film.trailer_uri raises an exception with an invalid uri
+        """
+        from ..models import Film
+        film = Film()
+        from . import BAD_URIS
+        from ..exceptions import ValidationError
+        for uri in BAD_URIS:
+            with self.assertRaises(ValidationError):
+                film.trailer_uri = uri
 
-    @attr('todo')
-    def test_wiki_uri_field(self):
-        self.fail()
+    def test_wiki_uri_sets_valid_uri(self):
+        """Film.wiki_uri sets a valid URI without raising an exception
+        """
+        from ..models import Film
+        film = Film()
+        from . import WIKI_URIS
+        from ..exceptions import ValidationError
+        for uri in WIKI_URIS:
+            try:
+                film.wiki_uri = uri
+            except ValidationError:
+                self.fail('Validation error raised: %s' % uri)
+            self.assertEqual(uri, film.wiki_uri)
 
-    @attr('todo')
     def test_wiki_uri_field_raises_exception_with_invalid_uri(self):
-        self.fail()
+        """Film.wiki_uri raises an exception with an invalid uri
+        """
+        from ..models import Film
+        film = Film()
+        from . import BAD_URIS
+        from ..exceptions import ValidationError
+        for uri in BAD_URIS:
+            with self.assertRaises(ValidationError):
+                film.wiki_uri = uri
 
     @attr('todo')
-    def test_serialize(self):
-        self.fail()
+    def test_serialize_works(self):
+        fields = {
+            'name': 'Nicolas Cage',
+            'img_uri': 'https://upload.wikimedia.org/wikipedia/commons/3/33/Nicolas_Cage_2011_CC.jpg'
+        }
+        expected = {
+            'id': None,
+            'name': fields['name'],
+            'img_uri': fields['img_uri'],
+            'producer_credits': [],
+            'director_credits': [],
+            'writer_credits': [],
+            'editor_credits': [],
+            'cast_credits': [],
+            'musician_credits': [],
+        }
+        from ..models import Person
+        person = Person(**fields)
+        self.assertEqual(expected, person.serialized)
 
 
 @attr('db')
@@ -282,7 +405,7 @@ class TestFilmPeopleRelationships(SQLiteTestCase):
                 self.film_title, [x.title for x in musicians.musician_credits])
 
     @attr('todo')
-    def test_cinimatographers(self):
-        """Film.musicians successfully populates an M2M relationship in SQLite
+    def test_cinematographers(self):
+        """Film.cinematographers successfully populates an M2M relationship in SQLite
         """
         self.fail()
