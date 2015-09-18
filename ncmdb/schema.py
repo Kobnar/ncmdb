@@ -52,12 +52,12 @@ class CreatePersonSchema(Schema):
     """
     name = SchemaNode(String())
     img_uri = SchemaNode(String(), validator=URIValidator(), missing=None)
-    producer_credits = _IDSequenceSchema(missing=[])
-    director_credits = _IDSequenceSchema(missing=[])
-    writer_credits = _IDSequenceSchema(missing=[])
-    editor_credits = _IDSequenceSchema(missing=[])
-    cast_credits = _IDSequenceSchema(missing=[])
-    musician_credits = _IDSequenceSchema(missing=[])
+    producer_credits = _IDSequenceSchema(missing=None)
+    director_credits = _IDSequenceSchema(missing=None)
+    writer_credits = _IDSequenceSchema(missing=None)
+    editor_credits = _IDSequenceSchema(missing=None)
+    cast_credits = _IDSequenceSchema(missing=None)
+    musician_credits = _IDSequenceSchema(missing=None)
 
 
 class RetrievePersonSchema(Schema):
@@ -67,7 +67,7 @@ class RetrievePersonSchema(Schema):
 
     NOTE: Declared fields are the only fields returned.
     """
-    fields = _PersonFieldsSequenceSchema(missing=[])
+    fields = _PersonFieldsSequenceSchema(missing=None)
 
 
 class UpdatePersonSchema(CreatePersonSchema):
@@ -90,12 +90,12 @@ class CreateFilmSchema(Schema):
     rating = SchemaNode(String(), missing=None)
     year = SchemaNode(Integer(), validator=Range(min=0), missing=None)
     running_time = SchemaNode(Integer(), validator=Range(min=0), missing=None)
-    producers = _IDSequenceSchema(missing=[])
-    directors = _IDSequenceSchema(missing=[])
-    writers = _IDSequenceSchema(missing=[])
-    editors = _IDSequenceSchema(missing=[])
-    cast = _IDSequenceSchema(missing=[])
-    musicians = _IDSequenceSchema(missing=[])
+    producers = _IDSequenceSchema(missing=None)
+    directors = _IDSequenceSchema(missing=None)
+    writers = _IDSequenceSchema(missing=None)
+    editors = _IDSequenceSchema(missing=None)
+    cast = _IDSequenceSchema(missing=None)
+    musicians = _IDSequenceSchema(missing=None)
     poster_uri = SchemaNode(String(), validator=URIValidator(), missing=None)
     trailer_uri = SchemaNode(String(), validator=URIValidator(), missing=None)
     wiki_uri = SchemaNode(String(), validator=URIValidator(), missing=None)
@@ -108,7 +108,7 @@ class RetrieveFilmSchema(Schema):
 
     NOTE: Declared fields are the only fields returned.
     """
-    fields = _FilmFieldsSequenceSchema(missing=[])
+    fields = _FilmFieldsSequenceSchema(missing=None)
 
 
 class UpdateFilmSchema(CreateFilmSchema):
