@@ -106,7 +106,7 @@ class RetrieveFilmRowSchema(Schema):
 
     NOTE: Declared fields are the only fields returned.
     """
-    fields = _FilmFieldsSequenceSchema(missing=None)
+    fields = _FilmFieldsSequenceSchema(missing=[])
 
 
 class UpdateFilmRowSchema(CreateFilmRowSchema):
@@ -117,4 +117,4 @@ class UpdateFilmRowSchema(CreateFilmRowSchema):
     NOTE: This schema is also used for performing RETRIEVE operations on the
     entire table.
     """
-    title = SchemaNode(String(), missing=None)
+    title = SchemaNode(String(), missing=[])
