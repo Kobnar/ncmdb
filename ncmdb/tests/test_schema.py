@@ -83,8 +83,8 @@ class CreatePersonSchemaTests(TestCase):
         from colander import Invalid
         try:
             self.schema.deserialize(self.params)
-        except Invalid:
-            self.fail('Missing image URI raised an exception.')
+        except Invalid as err:
+            self.fail(err.msg)
 
     def test_invalid_img_uri_raises_exception(self):
         """CreatePersonSchema raises an exception for an invalid image URI
