@@ -25,7 +25,6 @@ class _PersonFieldsSequenceSchema(SequenceSchema):
     """
     A SequenceSchema defining a list of acceptable fields for a single person.
     """
-
     fields = SchemaNode(String(), validator=OneOf(Person.FIELD_CHOICES))
 
 
@@ -33,7 +32,6 @@ class _FilmFieldsSequenceSchema(SequenceSchema):
     """
     A SequenceSchema defining a list of acceptable fields for a single film.
     """
-
     fields = SchemaNode(String(), validator=OneOf(Film.FIELD_CHOICES))
 
 
@@ -45,7 +43,7 @@ class IdSchema(Schema):
     id = _id_node
 
 
-class CreatePersonSchema(Schema):
+class CreatePersonRowSchema(Schema):
     """
     A Colander schema used to validate input for CREATE operations involving
     people.
@@ -60,7 +58,7 @@ class CreatePersonSchema(Schema):
     musician_credits = _IDSequenceSchema(missing=None)
 
 
-class RetrievePersonSchema(Schema):
+class RetrievePersonRowSchema(Schema):
     """
     A Colander schema used to validate input for RETRIEVE operations involving
     people.
@@ -70,18 +68,18 @@ class RetrievePersonSchema(Schema):
     fields = _PersonFieldsSequenceSchema(missing=None)
 
 
-class UpdatePersonSchema(CreatePersonSchema):
+class UpdatePersonRowSchema(CreatePersonRowSchema):
     """
     A Colander schema used to validate input for UPDATE operations involving
     people.
 
-    NOTE: Overrides `name` field of CreatePersonSchema to make all fields
-    optional.
+    NOTE: This schema is also used for performing RETRIEVE operations on the
+    entire table.
     """
     name = SchemaNode(String(), missing=None)
 
 
-class CreateFilmSchema(Schema):
+class CreateFilmRowSchema(Schema):
     """
     A Colander schema used to validate input for CREATE operations involving
     films.
@@ -101,7 +99,7 @@ class CreateFilmSchema(Schema):
     wiki_uri = SchemaNode(String(), validator=URIValidator(), missing=None)
 
 
-class RetrieveFilmSchema(Schema):
+class RetrieveFilmRowSchema(Schema):
     """
     A Colander schema used to validate input for RETRIEVE operations involving
     films.
@@ -111,12 +109,12 @@ class RetrieveFilmSchema(Schema):
     fields = _FilmFieldsSequenceSchema(missing=None)
 
 
-class UpdateFilmSchema(CreateFilmSchema):
+class UpdateFilmRowSchema(CreateFilmRowSchema):
     """
     A Colander schema used to validate input for UPDATE operations involving
     people.
 
-    NOTE: Overrides `name` field of CreateFilmSchema to make all fields
-    optional.
+    NOTE: This schema is also used for performing RETRIEVE operations on the
+    entire table.
     """
     title = SchemaNode(String(), missing=None)
