@@ -126,7 +126,7 @@ class PersonRowResourceTests(PersonResourceTestCase):
             self.assertEqual(PEOPLE[idx], person.name)
 
     def test_update_does_nothing_for_missing_resource(self):
-        """PersonRowResource.retrieve() makes no changes if no such person is found
+        """PersonRowResource.update() makes no changes if no such person is found
         """
         row_resource = self.table_resource[999]
         changes = {'name': 'Our Lord and Savior, Nicolas Cage'}
@@ -136,6 +136,30 @@ class PersonRowResourceTests(PersonResourceTestCase):
         for person in DBSession.query(Person):
             idx = person.id - 1
             self.assertEqual(PEOPLE[idx], person.name)
+
+    def test_update_does_not_raise_exception_with_none_uri(self):
+        """PersonRowResource.update() does not throw an exception if 'None' is passed as a uri
+        """
+        row_resource = self.table_resource[1]
+        changes = {
+            'name': 'Our Lord and Savior, Nicolas Cage',
+            'img_uri': None
+        }
+        try:
+            row_resource.update(changes)
+        except AttributeError as err:
+            self.fail(err)
+
+    def test_update_does_set_value_if_explicitly_none(self):
+        """PersonRowResource.update() does not change a field with an updated value of 'None'
+        """
+        row_resource = self.table_resource[1]
+        from ..models import Person
+        expected_name = DBSession.query(Person).filter_by(id=1).first().name
+        changes = {'name': None}
+        row_resource.update(changes)
+        person = DBSession.query(Person).filter_by(id=1).first()
+        self.assertEqual(expected_name, person.name)
 
     def test_delete_works(self):
         """PersonRowResource.delete() successfully deletes the row
