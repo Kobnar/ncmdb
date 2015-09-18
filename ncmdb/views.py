@@ -1,7 +1,9 @@
 from pyramid.view import view_defaults, view_config
-from pyramid.exceptions import HTTPNotFound
+from pyramid.httpexceptions import HTTPNotFound, HTTPCreated, HTTPBadRequest
+from colander import Invalid
 
-from .resources import PersonTableResource
+from .resources import PersonTableResource, PersonRowResource
+from .schema import CreatePersonSchema, RetrievePersonSchema
 
 
 class BaseView(object):
@@ -15,23 +17,59 @@ class BaseView(object):
 
 
 @view_defaults(context=PersonTableResource, renderer='json')
-class PersonIndexAPIViews(BaseView):
+class PeopleAPIIndexViews(BaseView):
+    """/api/v1/people/
+    """
+
+    @view_config(request_method='POST')
+    def create(self):
+        schema = CreatePersonSchema()
+        try:
+            data = schema.deserialize(self.request.POST)
+        except Invalid as err:
+            self.request.response.status_int = HTTPBadRequest.code
+            return err.asdict()
+        result = self.context.create(data)
+        if result:
+            self.request.response.status_int = HTTPCreated.code
+            self.request.response.location = '/api/v1/people/%s/' \
+                                             % str(result.id)
+            return {'id': result.id}
+        self.request.response.status_int = HTTPBadRequest.code
+        return {}
+
     @view_config(request_method='GET')
     def retrieve(self):
-        query = self.request.params
-        result = self.context.retrieve(query)
-        output = []
-        for person in result:
-            output.append({
-                'id': person.id,
-                'name': person.name,
-                'img_uri': person.img_uri,
-                'producer_credits': person.producer_credits,
-                'director_credits': person.director_credits,
-                'writer_credits': person.writer_credits,
-                'editor_credits': person.editor_credits,
-                'cast_credits': person.cast_credits,
-                'musician_credits': person.musician_credits})
+        schema = RetrievePersonSchema()
+        try:
+            data = schema.deserialize(self.request.POST)
+        except Invalid as err:
+            self.request.response.status_int = HTTPBadRequest.code
+            return err.asdict()
+        result = self.context.retrieve(data)
+        output = [x.serialized for x in result]
         if not output:
             self.request.response.status_int = HTTPNotFound.code
         return output
+
+
+@view_defaults(context=PersonRowResource, renderer='json')
+class PersonAPIViews(BaseView):
+    """/api/v1/people/{#}/
+    """
+
+    @view_config(request_method='GET')
+    def retrieve(self):
+        result = self.context.retrieve()
+        return result.serialized
+
+    @view_config(request_method='PUT')
+    def update(self):
+        fields = self.request.POST
+        result = self.context.update(fields)
+        return result.serialized
+
+    @view_config(request_method='DELETE')
+    def delete(self):
+        self.context.delete()
+        return {}
