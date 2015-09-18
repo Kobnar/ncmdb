@@ -1,11 +1,12 @@
 __author__ = 'kobnar'
+
 from nose.plugins.attrib import attr
 from . import DBSession, SQLiteTestCase
 
 
-class ViewsTestCase(SQLiteTestCase):
+class PeopleAPIIndexViewsTests(SQLiteTestCase):
     def setUp(self):
-        super(ViewsTestCase, self).setUp()
+        super(PeopleAPIIndexViewsTests, self).setUp()
         self.people = []
         from . import PEOPLE
         from ..models import Person
@@ -14,21 +15,16 @@ class ViewsTestCase(SQLiteTestCase):
             self.people.append(person)
             DBSession.add(person)
         DBSession.commit()
+        self.view = self.compile_view()
+        self.params = {'name': 'Nicolas Ford Coppola'}
 
-    def compile_view(self, view, context):
-        from pyramid.testing import DummyRequest
-        request = DummyRequest()
-        view_context = context(None, 'test_people', DBSession)
-        return view(view_context, request)
-
-
-class PeopleAPIIndexViewsTests(ViewsTestCase):
-    def setUp(self):
-        super(PeopleAPIIndexViewsTests, self).setUp()
+    def compile_view(self):
         from ..views import PeopleAPIIndexViews
         from ..resources import PersonTableResource
-        self.view = self.compile_view(PeopleAPIIndexViews, PersonTableResource)
-        self.params = {'name': 'Nicolas Ford Coppola'}
+        from pyramid.testing import DummyRequest
+        request = DummyRequest()
+        view_context = PersonTableResource(None, 'test_people', DBSession)
+        return PeopleAPIIndexViews(view_context, request)
 
     def test_create_creates_person(self):
         """create() should successfully create a person
@@ -144,3 +140,99 @@ class PeopleAPIIndexViewsTests(ViewsTestCase):
             self.assertTrue(name in output_names)
         for name in output_names:
             self.assertTrue(name in people_names)
+
+    def test_retrieve_with_no_results_returns_404(self):
+        """retrieve() should return 404 if no results matched the query
+        """
+        query = {'name': 'Nobody Atall'}
+        self.view.request.POST = query
+        self.view.retrieve()
+        from pyramid.httpexceptions import HTTPNotFound
+        response_code = self.view.request.response.status_int
+        self.assertEqual(HTTPNotFound.code, response_code)
+
+    def test_retrieve_with_invalid_query_returns_400(self):
+        """retrieve() should return 400 if one of the query parameters was invalid
+        """
+        query = {'img_uri': 'not_a_uri'}
+        self.view.request.POST = query
+        self.view.retrieve()
+        from pyramid.httpexceptions import HTTPBadRequest
+        response_code = self.view.request.response.status_int
+        self.assertEqual(HTTPBadRequest.code, response_code)
+
+
+class PersonAPIViewsTests(SQLiteTestCase):
+    def setUp(self):
+        super(PersonAPIViewsTests, self).setUp()
+        self.people = []
+        from . import PEOPLE
+        from ..models import Person
+        for name in PEOPLE:
+            person = Person(name=name)
+            self.people.append(person)
+            DBSession.add(person)
+        DBSession.commit()
+        self.params = {'name': 'Nicolas Ford Coppola'}
+
+    def compile_view(self, row_id):
+        from ..views import PersonAPIViews
+        from ..resources import PersonTableResource
+        table_resource = PersonTableResource(None, 'people')
+        from ..resources import PersonRowResource
+        from pyramid.testing import DummyRequest
+        request = DummyRequest()
+        view_context = PersonRowResource(table_resource, row_id, DBSession)
+        return PersonAPIViews(view_context, request)
+
+    def test_retrieve_works(self):
+        """retrieve() should return the appropriate person instance
+        """
+        for person in self.people:
+            view = self.compile_view(person.id)
+            result = view.retrieve()
+            self.assertEqual(person.id, result['id'])
+            self.assertEqual(person.name, result['name'])
+
+    def test_retrieve_returns_404_with_unregistered_id(self):
+        """retrieve() should return status code 400 with an unregistered ID
+        """
+        view = self.compile_view(999)
+        view.retrieve()
+        from pyramid.httpexceptions import HTTPNotFound
+        response_code = view.request.response.status_int
+        self.assertEqual(HTTPNotFound.code, response_code)
+
+    def test_retrieve_returns_400_with_invalid_id(self):
+        """retrieve() should return status code 400 with an invalid ID
+        """
+        view = self.compile_view(-1)
+        view.retrieve()
+        from pyramid.httpexceptions import HTTPBadRequest
+        response_code = view.request.response.status_int
+        self.assertEqual(HTTPBadRequest.code, response_code)
+
+    def test_retrieve_returns_errors_with_zero_id(self):
+        """retrieve() should return a dictionary of errors with a zero ID
+        """
+        view = self.compile_view(0)
+        result = view.retrieve()
+        self.assertEqual({'id': '0 is less than minimum value 1'}, result)
+
+    def test_retrieve_returns_errors_with_negative_id(self):
+        """retrieve() should return a dictionary of errors with a negative ID
+        """
+        view = self.compile_view(-1)
+        result = view.retrieve()
+        self.assertEqual({'id': '-1 is less than minimum value 1'}, result)
+
+    def test_retrieve_returns_only_specified_fields(self):
+        """retrieve() should return a dictionary of errors with a negative ID
+        """
+        view = self.compile_view(1)
+        view.request.GET = {'fields': ['name']}
+        result = view.retrieve()
+        self.assertTrue('name' in result.keys())
+        self.assertFalse('id' in result.keys())
+        self.assertFalse('img_uri' in result.keys())
+        self.assertFalse('producer_credits' in result.keys())

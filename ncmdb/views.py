@@ -3,7 +3,8 @@ from pyramid.httpexceptions import HTTPNotFound, HTTPCreated, HTTPBadRequest
 from colander import Invalid
 
 from .resources import PersonTableResource, PersonRowResource
-from .schema import CreatePersonSchema, RetrievePersonSchema
+from .schema import IdSchema, CreatePersonRowSchema, UpdatePersonRowSchema,\
+    RetrievePersonRowSchema
 
 
 class BaseView(object):
@@ -23,7 +24,7 @@ class PeopleAPIIndexViews(BaseView):
 
     @view_config(request_method='POST')
     def create(self):
-        schema = CreatePersonSchema()
+        schema = CreatePersonRowSchema()
         try:
             data = schema.deserialize(self.request.POST)
         except Invalid as err:
@@ -40,7 +41,7 @@ class PeopleAPIIndexViews(BaseView):
 
     @view_config(request_method='GET')
     def retrieve(self):
-        schema = RetrievePersonSchema()
+        schema = UpdatePersonRowSchema()
         try:
             data = schema.deserialize(self.request.POST)
         except Invalid as err:
@@ -60,16 +61,47 @@ class PersonAPIViews(BaseView):
 
     @view_config(request_method='GET')
     def retrieve(self):
+        id_schema = IdSchema()
+        fields_schema = RetrievePersonRowSchema()
+        try:
+            id_schema.deserialize({'id': self.context.id})
+            data = fields_schema.deserialize(self.request.GET)
+        except Invalid as err:
+            self.request.response.status_int = HTTPBadRequest.code
+            return err.asdict()
         result = self.context.retrieve()
-        return result.serialized
+        if result:
+            result = result.serialized
+            if data['fields']:
+                result = {k: v for k, v in result.items()
+                          if k in data['fields']}
+            return result
+        self.request.response.status_int = HTTPNotFound.code
+        return {}
 
     @view_config(request_method='PUT')
     def update(self):
-        fields = self.request.POST
-        result = self.context.update(fields)
-        return result.serialized
+        id_schema = IdSchema()
+        row_schema = UpdatePersonRowSchema()
+        try:
+            id_schema.deserialize({'id': self.context.id})
+            data = row_schema.deserialize(self.request.GET)
+        except Invalid as err:
+            self.request.response.status_int = HTTPBadRequest.code
+            return err.asdict()
+        result = self.context.update(data)
+        if result:
+            return result.serialized
+        self.request.response.status_int = HTTPBadRequest.code
+        return {}
 
     @view_config(request_method='DELETE')
     def delete(self):
+        id_schema = IdSchema()
+        try:
+            id_schema.deserialize({'id': self.context.id})
+        except Invalid as err:
+            self.request.response.status_int = HTTPBadRequest.code
+            return err.asdict()
         self.context.delete()
         return {}
