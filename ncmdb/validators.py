@@ -7,6 +7,10 @@ process.
 """
 
 import re
+import translationstring
+from colander import Invalid
+
+_ = translationstring.TranslationStringFactory('colander')
 
 
 _URI_REGEX = re.compile(
@@ -17,6 +21,8 @@ _URI_REGEX = re.compile(
     r'\[?[A-F0-9]*:[A-F0-9:]+\]?)'  # ...or ipv6
     r'(?::\d+)?'  # optional port
     r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+
+
 _URI_SCHEMES = ['http', 'https', 'ftp', 'ftps']
 
 
@@ -25,3 +31,19 @@ def validate_uri(url):
     if scheme in _URI_SCHEMES and _URI_REGEX.match(url):
         return url
     return
+
+
+class URIValidator(object):
+    """
+    A Colander style URL validator. Returns a :class:`colendar.Invalid`
+    exception if the URL is invalid.
+    """
+    def __init__(self, msg=None):
+        if msg is None:
+            self.msg = _('Invalid URL')
+        else:
+            self.msg = msg
+
+    def __call__(self, node, value):
+        if not validate_uri(value):
+            raise Invalid(node, self.msg)
