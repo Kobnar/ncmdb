@@ -95,7 +95,7 @@ class CreatePersonSchemaTests(TestCase):
             self.schema.deserialize(self.params)
 
     def test_zero_id_raises_exception(self):
-        """_IDSequenceSchema raises exception if an ID is set to 0
+        """CreatePersonSchema.producer_credits raises exception if an ID is set to 0
         """
         self.params['producer_credits'] = [0]
         from colander import Invalid
@@ -103,7 +103,7 @@ class CreatePersonSchemaTests(TestCase):
             self.schema.deserialize(self.params)
 
     def test_duplicate_id_raises_exception(self):
-        """_IDSequenceSchema raises exception if a duplicate ID is detected
+        """CreatePersonSchema.producer_credits raises exception if a duplicate ID is detected (ON HOLD)
         """
         self.params['producer_credits'] = [1, 1]
         from colander import Invalid
@@ -141,8 +141,9 @@ class RetrievePersonSchemaTests(TestCase):
     def test_valid_fields_work(self):
         """RetrievePersonSchema does not raise an exception for any valid fields
         """
-        valid_fields = self.schema['fields'].FIELD_CHOICES
-        params = {'fields': valid_fields}
+        from ..schema import FIELD_CHOICES
+        field_choices = FIELD_CHOICES['person']
+        params = {'fields': field_choices}
         from colander import Invalid
         try:
             self.schema.deserialize(params)
@@ -294,8 +295,9 @@ class RetrieveFilmSchemaTests(TestCase):
     def test_valid_fields_work(self):
         """RetrieveFilmSchema does not raise an exception for any valid fields
         """
-        valid_fields = self.schema['fields'].FIELD_CHOICES
-        params = {'fields': valid_fields}
+        from ..schema import FIELD_CHOICES
+        field_choices = FIELD_CHOICES['film']
+        params = {'fields': field_choices}
         from colander import Invalid
         try:
             self.schema.deserialize(params)

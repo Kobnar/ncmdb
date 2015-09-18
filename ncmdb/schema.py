@@ -10,6 +10,35 @@ from .validators import URIValidator
 _ = translationstring.TranslationStringFactory('colander')
 
 
+FIELD_CHOICES = {
+    'person': [
+        'name',
+        'img_uri',
+        'producer_credits',
+        'director_credits',
+        'writer_credits',
+        'editor_credits',
+        'cast_credits',
+        'musician_credits',
+    ],
+    'film': [
+        'title',
+        'rating',
+        'year',
+        'running_time',
+        'producers',
+        'directors',
+        'writers',
+        'editors',
+        'cast',
+        'musicians',
+        'poster_uri',
+        'trailer_uri',
+        'wiki_uri',
+    ]
+}
+
+
 _id_node = SchemaNode(Integer(), validator=Range(min=1))
 
 
@@ -25,18 +54,7 @@ class _PersonFieldsSequenceSchema(SequenceSchema):
     A SequenceSchema defining a list of acceptable fields for a single person.
     """
 
-    FIELD_CHOICES = [
-        'name',
-        'img_uri',
-        'producer_credits',
-        'director_credits',
-        'writer_credits',
-        'editor_credits',
-        'cast_credits',
-        'musician_credits',
-    ]
-
-    fields = SchemaNode(String(), validator=OneOf(FIELD_CHOICES))
+    fields = SchemaNode(String(), validator=OneOf(FIELD_CHOICES['person']))
 
 
 class _FilmFieldsSequenceSchema(SequenceSchema):
@@ -44,23 +62,7 @@ class _FilmFieldsSequenceSchema(SequenceSchema):
     A SequenceSchema defining a list of acceptable fields for a single film.
     """
 
-    FIELD_CHOICES = [
-        'title',
-        'rating',
-        'year',
-        'running_time',
-        'producers',
-        'directors',
-        'writers',
-        'editors',
-        'cast',
-        'musicians',
-        'poster_uri',
-        'trailer_uri',
-        'wiki_uri',
-    ]
-
-    fields = SchemaNode(String(), validator=OneOf(FIELD_CHOICES))
+    fields = SchemaNode(String(), validator=OneOf(FIELD_CHOICES['film']))
 
 
 class IdSchema(Schema):
