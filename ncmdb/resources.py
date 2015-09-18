@@ -1,11 +1,11 @@
 __author__ = 'kobnar'
 
-from sqlalchemy import insert, update, delete
+from sqlalchemy.exc import IntegrityError
 
 from .models import DBSession, Person, Film
 
 
-class RootResource(object):
+class IndexResource(object):
     """
     A base resource used for Pyramid's traversal URL handling system.
     """
@@ -23,7 +23,7 @@ class RootResource(object):
         self._items[name] = child
 
 
-class RowResource(RootResource):
+class RowResource(IndexResource):
     """
     A base resource used to RETRIEVE, UPDATE and DELETE row-level data from
     SQLite.
@@ -33,26 +33,55 @@ class RowResource(RootResource):
 
     def __init__(self, parent, row_id, db_session=DBSession):
         self._db = db_session
-        RootResource.__init__(self, parent, row_id)
+        IndexResource.__init__(self, parent, str(row_id))
         self._table = parent.table
 
     @property
     def id(self):
-        return self.__name__
+        """
+        The current row's ID (primary key).
+        """
+        return int(self.__name__)
 
     @property
     def table(self):
+        """
+        The current row's associated table.
+        """
         return self._table
 
     def retrieve(self):
+        """
+        Fetches the current row from the database.
+
+        :return: An instanced version of the current row
+        """
         return self._query.first()
 
-    def update(self, json_doc):
-        self._query.update(json_doc)
-        self._db.commit()
-        return self.retrieve()
+    def update(self, row_data):
+        """
+        Updates the current row in the database using a specified dict of valid
+        parameters.
+
+        NOTE: Only fields explicitly defined in the table's FIELD_CHOICES list
+        are accepted as valid parameters.
+
+        :param row_data: A dictionary of row data
+        :return: An instanced version of the current row
+        """
+        valid_data = {k: v for k, v in row_data.items()
+                      if k in self.table.FIELD_CHOICES}
+        if valid_data:
+            self._query.update(valid_data)
+            self._db.flush()
+            return self.retrieve()
 
     def delete(self):
+        """
+        Deletes the current row from the database.
+
+        :return: None
+        """
         self._query.delete()
 
     @property
@@ -60,7 +89,7 @@ class RowResource(RootResource):
         return self._db.query(self.table).filter_by(id=self.id)
 
 
-class TableResource(RootResource):
+class TableResource(IndexResource):
     """
     A base resource used to CREATE and RETRIEVE table-level data from SQLite.
 
@@ -78,23 +107,45 @@ class TableResource(RootResource):
 
     @property
     def table(self):
+        """
+        The current table.
+        """
         return self._table
 
-    def create(self, fields_dict):
-        row = self.table(**fields_dict)
-        self._db.add(row)
-        self._db.commit()
-        return row
+    def create(self, row_data):
+        """
+        Saves a new row in the current table based on a dictionary of data.
 
-    def retrieve(self, filter_dict=None):
-        if not filter_dict:
-            filter_dict = {}
-        query = self._db.query(self.table)
+        :param row_data: A dictionary of row data
+        :return: An instanced version of the newly created row
+        """
+        valid_data = {k: v for k, v in row_data.items()
+                      if k in self.table.FIELD_CHOICES}
+        row_obj = self.table(**valid_data)
+        self._db.add(row_obj)
         try:
-            for field, value in filter_dict.items():
-                query = query.filter(getattr(self.table, field).like('%%%s%%' % value))
-        except AttributeError:
-            return []
+            self._db.flush()
+        except IntegrityError:
+            self._db.rollback()
+            return None
+        return row_obj
+
+    def retrieve(self, row_data=None):
+        """
+        Fetches every row in the database which matches the given query. If no
+        query is provided, dumps every item in the table.
+
+        :param row_data: A dictionary of row data.
+        :return: A list of instanced versions of each matching row
+        """
+        if not row_data:
+            valid_data = {}
+        else:
+            valid_data = {k: v for k, v in row_data.items()
+                          if k in self.table.FIELD_CHOICES}
+        query = self._db.query(self.table)
+        for field, value in valid_data.items():
+            query = query.filter(getattr(self.table, field).like('%%%s%%' % value))
         return [x for x in query]
 
 
