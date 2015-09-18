@@ -238,7 +238,7 @@ class PersonTableResourceTests(PersonResourceTestCase):
         from . import PEOPLE
         self.assertEqual(PEOPLE[0], result[0].name)
 
-    def test_retrieve_returns_filtered_part(self):
+    def test_retrieve_returns_filtered_partial_string(self):
         """PersonTableResource.retrieve() returns a filtered list of people who match a partial string
         """
         query = {'name': 'ch'}
@@ -246,6 +246,14 @@ class PersonTableResourceTests(PersonResourceTestCase):
         self.assertEqual(4, len(result))
         from . import PEOPLE
         self.assertEqual(PEOPLE[5], result[0].name)
+
+    def test_retrieve_ignores_explicit_id(self):
+        """PersonTableResource.retrieve() ignores an explicit ID
+        """
+        query = {'id': 5}
+        result = self.table_resource.retrieve(query)
+        for person in self.people:
+            self.assertTrue(person.name in [x.name for x in result])
 
     def test_retrieve_ignores_invalid_fields(self):
         """PersonTableResource.retrieve() ignores invalid fields in query
