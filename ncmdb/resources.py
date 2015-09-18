@@ -144,7 +144,8 @@ class TableResource(IndexResource):
             valid_data = {}
         else:
             valid_data = {k: v for k, v in row_data.items()
-                          if k in self.table.FIELD_CHOICES}
+                          if k in self.table.FIELD_CHOICES
+                          and v is not None}
         query = self._db.query(self.table)
         for field, value in valid_data.items():
             query = query.filter(getattr(self.table, field).like('%%%s%%' % value))
