@@ -58,6 +58,17 @@ class Person(Base):
 
     __tablename__ = 'person'
 
+    FIELD_CHOICES = [
+        'name',
+        'img_uri',
+        'producer_credits',
+        'director_credits',
+        'writer_credits',
+        'editor_credits',
+        'cast_credits',
+        'musician_credits',
+    ]
+
     id = Column(Integer, primary_key=True)
     name = Column(Text, unique=True, nullable=False)
     _img_uri = Column(Text)
@@ -102,6 +113,22 @@ class Film(Base):
     """
 
     __tablename__ = 'film'
+
+    FIELD_CHOICES = [
+        'title',
+        'rating',
+        'year',
+        'running_time',
+        'producers',
+        'directors',
+        'writers',
+        'editors',
+        'cast',
+        'musicians',
+        'poster_uri',
+        'trailer_uri',
+        'wiki_uri',
+    ]
 
     id = Column(Integer, primary_key=True)
 

@@ -141,8 +141,8 @@ class RetrievePersonSchemaTests(TestCase):
     def test_valid_fields_work(self):
         """RetrievePersonSchema does not raise an exception for any valid fields
         """
-        from ..schema import FIELD_CHOICES
-        field_choices = FIELD_CHOICES['person']
+        from ..models import Person
+        field_choices = Person.FIELD_CHOICES
         params = {'fields': field_choices}
         from colander import Invalid
         try:
@@ -295,8 +295,8 @@ class RetrieveFilmSchemaTests(TestCase):
     def test_valid_fields_work(self):
         """RetrieveFilmSchema does not raise an exception for any valid fields
         """
-        from ..schema import FIELD_CHOICES
-        field_choices = FIELD_CHOICES['film']
+        from ..models import Film
+        field_choices = Film.FIELD_CHOICES
         params = {'fields': field_choices}
         from colander import Invalid
         try:
