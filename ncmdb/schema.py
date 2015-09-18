@@ -1,49 +1,148 @@
 __author__ = 'kobnar'
 
 import translationstring
-from colander import Invalid, Schema, SchemaNode, SequenceSchema, String,\
-    Integer, Range
+from colander import Schema, SchemaNode, SequenceSchema, String, Integer, \
+    Range, OneOf
 
 from .validators import URIValidator
+
 
 _ = translationstring.TranslationStringFactory('colander')
 
 
-class IDSequenceSchema(SequenceSchema):
+_id_node = SchemaNode(Integer(), validator=Range(min=1))
+
+
+class _IDSequenceSchema(SequenceSchema):
     """
     A flat list of id fields.
     """
-    id = SchemaNode(Integer(), validator=Range(min=1))
+    id = _id_node
 
 
-class PersonSchema(Schema):
+class _PersonFieldsSequenceSchema(SequenceSchema):
     """
-    A form handler for any CRUD operations involving people.
+    A SequenceSchema defining a list of acceptable fields for a single person.
+    """
+
+    FIELD_CHOICES = [
+        'name',
+        'img_uri',
+        'producer_credits',
+        'director_credits',
+        'writer_credits',
+        'editor_credits',
+        'cast_credits',
+        'musician_credits',
+    ]
+
+    fields = SchemaNode(String(), validator=OneOf(FIELD_CHOICES))
+
+
+class _FilmFieldsSequenceSchema(SequenceSchema):
+    """
+    A SequenceSchema defining a list of acceptable fields for a single film.
+    """
+
+    FIELD_CHOICES = [
+        'title',
+        'rating',
+        'year',
+        'running_time',
+        'producers',
+        'directors',
+        'writers',
+        'editors',
+        'cast',
+        'musicians',
+        'poster_uri',
+        'trailer_uri',
+        'wiki_uri',
+    ]
+
+    fields = SchemaNode(String(), validator=OneOf(FIELD_CHOICES))
+
+
+class IdSchema(Schema):
+    """
+    A simple form schema used to validate a resource ID before it is used in a
+    query.
+    """
+    id = _id_node
+
+
+class CreatePersonSchema(Schema):
+    """
+    A Colander schema used to validate input for CREATE operations involving
+    people.
     """
     name = SchemaNode(String())
     img_uri = SchemaNode(String(), validator=URIValidator(), missing=None)
-    producer_credits = IDSequenceSchema(missing=[])
-    director_credits = IDSequenceSchema(missing=[])
-    writer_credits = IDSequenceSchema(missing=[])
-    editor_credits = IDSequenceSchema(missing=[])
-    cast_credits = IDSequenceSchema(missing=[])
-    musician_credits = IDSequenceSchema(missing=[])
+    producer_credits = _IDSequenceSchema(missing=[])
+    director_credits = _IDSequenceSchema(missing=[])
+    writer_credits = _IDSequenceSchema(missing=[])
+    editor_credits = _IDSequenceSchema(missing=[])
+    cast_credits = _IDSequenceSchema(missing=[])
+    musician_credits = _IDSequenceSchema(missing=[])
 
 
-class FilmSchema(Schema):
+class RetrievePersonSchema(Schema):
     """
-    A form handler for any CRUD operations involving films.
+    A Colander schema used to validate input for RETRIEVE operations involving
+    people.
+
+    NOTE: Declared fields are the only fields returned.
+    """
+    fields = _PersonFieldsSequenceSchema(missing=[])
+
+
+class UpdatePersonSchema(CreatePersonSchema):
+    """
+    A Colander schema used to validate input for UPDATE operations involving
+    people.
+
+    NOTE: Overrides `name` field of CreatePersonSchema to make all fields
+    optional.
+    """
+    name = SchemaNode(String(), missing=None)
+
+
+class CreateFilmSchema(Schema):
+    """
+    A Colander schema used to validate input for CREATE operations involving
+    films.
     """
     title = SchemaNode(String())
     rating = SchemaNode(String(), missing=None)
     year = SchemaNode(Integer(), validator=Range(min=0), missing=None)
     running_time = SchemaNode(Integer(), validator=Range(min=0), missing=None)
-    producers = IDSequenceSchema(missing=[])
-    directors = IDSequenceSchema(missing=[])
-    writers = IDSequenceSchema(missing=[])
-    editors = IDSequenceSchema(missing=[])
-    cast = IDSequenceSchema(missing=[])
-    musicians = IDSequenceSchema(missing=[])
+    producers = _IDSequenceSchema(missing=[])
+    directors = _IDSequenceSchema(missing=[])
+    writers = _IDSequenceSchema(missing=[])
+    editors = _IDSequenceSchema(missing=[])
+    cast = _IDSequenceSchema(missing=[])
+    musicians = _IDSequenceSchema(missing=[])
     poster_uri = SchemaNode(String(), validator=URIValidator(), missing=None)
     trailer_uri = SchemaNode(String(), validator=URIValidator(), missing=None)
     wiki_uri = SchemaNode(String(), validator=URIValidator(), missing=None)
+
+
+class RetrieveFilmSchema(Schema):
+    """
+    A Colander schema used to validate input for RETRIEVE operations involving
+    films.
+
+    NOTE: Declared fields are the only fields returned.
+    """
+    fields = _FilmFieldsSequenceSchema(missing=[])
+
+
+class UpdateFilmSchema(CreateFilmSchema):
+    """
+    A Colander schema used to validate input for UPDATE operations involving
+    people.
+
+    NOTE: Overrides `name` field of CreateFilmSchema to make all fields
+    optional.
+    """
+    title = SchemaNode(String(), missing=None)
