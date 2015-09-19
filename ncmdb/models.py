@@ -145,17 +145,17 @@ class Film(Base):
     _wiki_uri = Column(Text)
 
     # FK relationships:
-    producers = relationship(
+    _producers = relationship(
         'Person', secondary=producer_credit, backref='producer_credits')
-    directors = relationship(
+    _directors = relationship(
         'Person', secondary=director_credit, backref='director_credits')
-    writers = relationship(
+    _writers = relationship(
         'Person', secondary=writer_credit, backref='writer_credits')
-    editors = relationship(
+    _editors = relationship(
         'Person', secondary=editor_credit, backref='editor_credits')
-    cast = relationship(
+    _cast = relationship(
         'Person', secondary=cast_credit, backref='cast_credits')
-    musicians = relationship(
+    _musicians = relationship(
         'Person', secondary=musician_credit, backref='musician_credits')
 
     @hybrid_property
@@ -183,6 +183,67 @@ class Film(Base):
         if running_time < 0:
             raise ValidationError('running_time', running_time)
         self._running_time = running_time
+
+    @hybrid_property
+    def producers(self):
+        return self._producers
+
+    @producers.setter
+    def producers(self, list):
+        if not list:
+            list = []
+        self._producers = list
+
+    @hybrid_property
+    def directors(self):
+        return self._directors
+
+    @directors.setter
+    def directors(self, list):
+        if not list:
+            list = []
+        self._directors = list
+
+    @hybrid_property
+    def writers(self):
+        return self._writers
+
+    @writers.setter
+    def writers(self, list):
+        if not list:
+            list = []
+        self._writers = list
+
+    @hybrid_property
+    def editors(self):
+        return self._editors
+
+    @editors.setter
+    def editors(self, list):
+        if not list:
+            list = []
+        self._editors = list
+
+    @hybrid_property
+    def cast(self):
+        return self._cast
+
+    @cast.setter
+    def cast(self, list):
+        if not list:
+            list = []
+        self._cast = list
+
+    @hybrid_property
+    def musicians(self):
+        return self._musicians
+
+    @musicians.setter
+    def musicians(self, list):
+        if not list:
+            list = []
+        self._musicians = list
+
 
     @hybrid_property
     def poster_uri(self):

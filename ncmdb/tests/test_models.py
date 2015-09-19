@@ -325,6 +325,55 @@ class TestFilmModel(SQLiteTestCase):
         except ValidationError as err:
             self.fail(err.msg)
 
+    def test_producers_accepts_none(self):
+        """Film.producers accepts 'None' and sets an empty list
+        """
+        from ..models import Film
+        film = Film()
+        film.producers = None
+        self.assertEqual([], film.producers)
+
+    def test_directors_accepts_none(self):
+        """Film.directors accepts 'None' and sets an empty list
+        """
+        from ..models import Film
+        film = Film()
+        film.directors = None
+        self.assertEqual([], film.directors)
+
+    def test_writers_accepts_none(self):
+        """Film.writers accepts 'None' and sets an empty list
+        """
+        from ..models import Film
+        film = Film()
+        film.writers = None
+        self.assertEqual([], film.writers)
+
+    def test_editors_accepts_none(self):
+        """Film.editors accepts 'None' and sets an empty list
+        """
+        from ..models import Film
+        film = Film()
+        film.editors = None
+        self.assertEqual([], film.editors)
+
+    def test_cast_accepts_none(self):
+        """Film.cast accepts 'None' and sets an empty list
+        """
+        from ..models import Film
+        film = Film()
+        film.cast = None
+        self.assertEqual([], film.cast)
+
+    def test_musicians_accepts_none(self):
+        """Film.musicians accepts 'None' and sets an empty list
+        """
+        from ..models import Film
+        film = Film()
+        film.musicians = None
+        self.assertEqual([], film.musicians)
+
+
     @attr('todo')
     def test_serialize_works(self):
         fields = {
