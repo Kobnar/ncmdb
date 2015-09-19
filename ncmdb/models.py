@@ -86,23 +86,22 @@ class Person(Base):
             raise ValidationError('poster_uri', uri)
         self._img_uri = uri
 
-    @property
-    def serialized(self):
+    def __json__(self, request):
         """
-        A dictionary-serialized version of the data for this person (for use
-        with a JSON renderer, etc.).
+        A custom JSON serializing method.
         """
-        return {
+        output = {
             'id': self.id,
-            'name': self.name,
-            'img_uri': self.img_uri,
-            'producer_credits': [x.title for x in self.producer_credits],
-            'director_credits': [x.title for x in self.director_credits],
-            'writer_credits': [x.title for x in self.writer_credits],
-            'editor_credits': [x.title for x in self.editor_credits],
-            'cast_credits': [x.title for x in self.cast_credits],
-            'musician_credits': [x.title for x in self.musician_credits]
+            'name': self.name
         }
+        for key in self.FIELD_CHOICES:
+            value = getattr(self, key)
+            if value:
+                if type(value[0]) == Film:
+                    output[key] = [x.title for x in value]
+                else:
+                    output[key] = value
+        return output
 
 
 class Film(Base):
@@ -284,21 +283,19 @@ class Film(Base):
             raise ValidationError('wiki_uri', uri)
         self._wiki_uri = uri
 
-    @property
-    def serialized(self):
+    def __json__(self, request):
         """
-        A dictionary-serialized version of the data for this film (for use with
-        a JSON renderer, etc.).
+        A custom JSON serializing method.
         """
-        return {
+        output = {
             'id': self.id,
-            'title': self.title,
-            'year': self.year,
-            'running_time': self.running_time,
-            'producers': [p.name for p in self.producers],
-            'directors': [d.name for d in self.directors],
-            'writers': [w.name for w in self.writers],
-            'editors': [e.name for e in self.editors],
-            'cast': [c.name for c in self.editors],
-            'musicians': [m.name for m in self.musicians]
+            'title': self.title
         }
+        for key in self.FIELD_CHOICES:
+            value = getattr(self, key)
+            if value:
+                if type(value[0]) == Person:
+                    output[key] = [x.title for x in value]
+                else:
+                    output[key] = value
+        return output

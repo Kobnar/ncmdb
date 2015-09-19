@@ -48,10 +48,9 @@ class PeopleAPIIndexViews(BaseView):
             self.request.response.status_int = HTTPBadRequest.code
             return err.asdict()
         result = self.context.retrieve(data)
-        output = [x.serialized for x in result]
-        if not output:
+        if not result:
             self.request.response.status_int = HTTPNotFound.code
-        return output
+        return result
 
 
 @view_defaults(context=PersonRowResource, renderer='json')
@@ -71,8 +70,6 @@ class PersonAPIViews(BaseView):
             return err.asdict()
         result = self.context.retrieve()
         if result:
-            result = result.serialized
-            print(result)
             if data['fields']:
                 result = {k: v for k, v in result.items()
                           if k in data['fields']}
@@ -92,7 +89,7 @@ class PersonAPIViews(BaseView):
             return err.asdict()
         result = self.context.update(data)
         if result:
-            return result.serialized
+            return result
         self.request.response.status_int = HTTPBadRequest.code
         return {}
 
