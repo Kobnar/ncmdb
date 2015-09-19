@@ -245,3 +245,15 @@ class PersonAPIViewsTests(SQLiteTestCase):
         self.assertFalse('id' in result.keys())
         self.assertFalse('img_uri' in result.keys())
         self.assertFalse('producer_credits' in result.keys())
+
+
+class FilmAPIIndexViewsTests(SQLiteTestCase):
+    @attr('todo')
+    def test_film_index_api(self):
+        self.fail()
+
+
+class FilmAPIViewsTests(SQLiteTestCase):
+    @attr('todo')
+    def test_film_resource_api(self):
+        self.fail()
