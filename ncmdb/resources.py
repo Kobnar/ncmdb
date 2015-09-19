@@ -70,8 +70,7 @@ class RowResource(IndexResource):
         :return: An instanced version of the current row
         """
         valid_data = {k: v for k, v in row_data.items()
-                      if k in self.table.FIELD_CHOICES
-                      and v is not None}
+                      if k in self.table.FIELD_CHOICES and v is not None}
         if valid_data:
             self._query.update(valid_data)
             self._db.flush()
@@ -121,8 +120,7 @@ class TableResource(IndexResource):
         :return: An instanced version of the newly created row
         """
         valid_data = {k: v for k, v in row_data.items()
-                      if k in self.table.FIELD_CHOICES
-                      and v is not None}
+                      if k in self.table.FIELD_CHOICES and v is not None}
         row_obj = self.table(**valid_data)
         self._db.add(row_obj)
         try:
@@ -144,11 +142,11 @@ class TableResource(IndexResource):
             valid_data = {}
         else:
             valid_data = {k: v for k, v in row_data.items()
-                          if k in self.table.FIELD_CHOICES
-                          and v is not None}
+                          if k in self.table.FIELD_CHOICES and v is not None}
         query = self._db.query(self.table)
         for field, value in valid_data.items():
-            query = query.filter(getattr(self.table, field).like('%%%s%%' % value))
+            query = query.filter(
+                getattr(self.table, field).like('%%%s%%' % value))
         return [x for x in query]
 
 

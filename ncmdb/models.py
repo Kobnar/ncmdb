@@ -116,7 +116,7 @@ class Film(Base):
     FIELD_CHOICES = [
         'title',
         'plot',
-        'rating',
+        # 'rating',
         'year',
         'running_time',
         'producers',
@@ -294,8 +294,8 @@ class Film(Base):
         for key in self.FIELD_CHOICES:
             value = getattr(self, key)
             if value:
-                if type(value[0]) == Person:
-                    output[key] = [x.title for x in value]
-                else:
+                if type(value) is int or type(value[0]) is not Person:
                     output[key] = value
+                else:
+                    output[key] = [x.name for x in value]
         return output
