@@ -145,7 +145,7 @@ class PeopleAPIIndexViewsTests(SQLiteTestCase):
         """retrieve() should return 404 if no results matched the query
         """
         query = {'name': 'Nobody Atall'}
-        self.view.request.POST = query
+        self.view.request.GET = query
         self.view.retrieve()
         from pyramid.httpexceptions import HTTPNotFound
         response_code = self.view.request.response.status_int
@@ -155,11 +155,20 @@ class PeopleAPIIndexViewsTests(SQLiteTestCase):
         """retrieve() should return 400 if one of the query parameters was invalid
         """
         query = {'img_uri': 'not_a_uri'}
-        self.view.request.POST = query
+        self.view.request.GET = query
         self.view.retrieve()
         from pyramid.httpexceptions import HTTPBadRequest
         response_code = self.view.request.response.status_int
         self.assertEqual(HTTPBadRequest.code, response_code)
+
+    def test_retrieve_returns_name_query(self):
+        """retrieve() should return items related to a specific query
+        """
+        query = {'name': 'Nic'}
+        self.view.request.GET = query
+        output = self.view.retrieve()
+        self.assertEqual(1, len(output))
+        self.assertEqual(output[0]['name'], 'Nicolas Cage')
 
 
 class PersonAPIViewsTests(SQLiteTestCase):

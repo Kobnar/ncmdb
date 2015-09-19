@@ -43,7 +43,7 @@ class PeopleAPIIndexViews(BaseView):
     def retrieve(self):
         schema = UpdatePersonRowSchema()
         try:
-            data = schema.deserialize(self.request.POST)
+            data = schema.deserialize(self.request.GET)
         except Invalid as err:
             self.request.response.status_int = HTTPBadRequest.code
             return err.asdict()
@@ -72,6 +72,7 @@ class PersonAPIViews(BaseView):
         result = self.context.retrieve()
         if result:
             result = result.serialized
+            print(result)
             if data['fields']:
                 result = {k: v for k, v in result.items()
                           if k in data['fields']}
@@ -85,7 +86,7 @@ class PersonAPIViews(BaseView):
         row_schema = UpdatePersonRowSchema()
         try:
             id_schema.deserialize({'id': self.context.id})
-            data = row_schema.deserialize(self.request.GET)
+            data = row_schema.deserialize(self.request.POST)
         except Invalid as err:
             self.request.response.status_int = HTTPBadRequest.code
             return err.asdict()
