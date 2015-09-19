@@ -96,12 +96,12 @@ class Person(Base):
             'id': self.id,
             'name': self.name,
             'img_uri': self.img_uri,
-            'producer_credits': self.producer_credits,
-            'director_credits': self.director_credits,
-            'writer_credits': self.writer_credits,
-            'editor_credits': self.editor_credits,
-            'cast_credits': self.cast_credits,
-            'musician_credits': self.musician_credits
+            'producer_credits': [x.title for x in self.producer_credits],
+            'director_credits': [x.title for x in self.director_credits],
+            'writer_credits': [x.title for x in self.writer_credits],
+            'editor_credits': [x.title for x in self.editor_credits],
+            'cast_credits': [x.title for x in self.cast_credits],
+            'musician_credits': [x.title for x in self.musician_credits]
         }
 
 

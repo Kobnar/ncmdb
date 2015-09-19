@@ -373,7 +373,6 @@ class TestFilmModel(SQLiteTestCase):
         film.musicians = None
         self.assertEqual([], film.musicians)
 
-
     @attr('todo')
     def test_serialize_works(self):
         fields = {
@@ -502,5 +501,11 @@ class TestFilmPeopleRelationships(SQLiteTestCase):
     @attr('todo')
     def test_cinematographers(self):
         """Film.cinematographers successfully populates an M2M relationship in SQLite
+        """
+        self.fail()
+
+    @attr('todo')
+    def test_credits_with_links(self):
+        """Person.serialized should return a list of titles for credits, not objects
         """
         self.fail()
