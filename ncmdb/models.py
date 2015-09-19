@@ -116,7 +116,7 @@ class Film(Base):
     FIELD_CHOICES = [
         'title',
         'plot',
-        # 'rating',
+        'rating',
         'year',
         'running_time',
         'producers',
@@ -135,6 +135,7 @@ class Film(Base):
     # Local data:
     title = Column(Text, unique=True, nullable=False)
     plot = Column(Text)
+    rating = Column(Text)
     _year = Column(Integer)
     _running_time = Column(Integer)
 
