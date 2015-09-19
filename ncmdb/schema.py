@@ -65,7 +65,7 @@ class RetrievePersonRowSchema(Schema):
 
     NOTE: Declared fields are the only fields returned.
     """
-    fields = _PersonFieldsSequenceSchema(missing=None)
+    fields = _PersonFieldsSequenceSchema(missing=[])
 
 
 class UpdatePersonRowSchema(CreatePersonRowSchema):
@@ -117,4 +117,4 @@ class UpdateFilmRowSchema(CreateFilmRowSchema):
     NOTE: This schema is also used for performing RETRIEVE operations on the
     entire table.
     """
-    title = SchemaNode(String(), missing=[])
+    title = SchemaNode(String(), missing=None)
