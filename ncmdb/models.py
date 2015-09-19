@@ -167,7 +167,7 @@ class Film(Base):
 
     @year.setter
     def year(self, year):
-        if year < 0:
+        if year and year < 0:
             raise ValidationError('year', year)
         self._year = year
 
@@ -180,7 +180,7 @@ class Film(Base):
 
     @running_time.setter
     def running_time(self, running_time):
-        if running_time < 0:
+        if running_time and running_time < 0:
             raise ValidationError('running_time', running_time)
         self._running_time = running_time
 

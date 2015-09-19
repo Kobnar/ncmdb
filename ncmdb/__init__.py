@@ -2,15 +2,16 @@ from pyramid.config import Configurator
 from pyramid.renderers import JSON
 from sqlalchemy import engine_from_config
 
-from .resources import RootResource, PersonRowResource, PersonTableResource
+from .resources import IndexResource, PersonTableResource, FilmTableResource
 from .models import DBSession, Base
 
 
 def traversal_factory(request):
-    root = RootResource(None, '')
-    root['api'] = RootResource
-    root['api']['v1'] = RootResource
+    root = IndexResource(None, '')
+    root['api'] = IndexResource
+    root['api']['v1'] = IndexResource
     root['api']['v1']['people'] = PersonTableResource
+    root['api']['v1']['films'] = FilmTableResource
     return root
 
 
