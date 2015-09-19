@@ -82,7 +82,7 @@ class Person(Base):
 
     @img_uri.setter
     def img_uri(self, uri):
-        if not validate_uri(uri):
+        if uri and not validate_uri(uri):
             raise ValidationError('poster_uri', uri)
         self._img_uri = uri
 
@@ -116,6 +116,7 @@ class Film(Base):
 
     FIELD_CHOICES = [
         'title',
+        'plot',
         'rating',
         'year',
         'running_time',
@@ -134,9 +135,9 @@ class Film(Base):
 
     # Local data:
     title = Column(Text, unique=True, nullable=False)
+    plot = Column(Text)
     _year = Column(Integer)
     _running_time = Column(Integer)
-    description = Column(Text)
 
     # Remote data:
     _poster_uri = Column(Text)
@@ -192,7 +193,7 @@ class Film(Base):
 
     @poster_uri.setter
     def poster_uri(self, uri):
-        if not validate_uri(uri):
+        if uri and not validate_uri(uri):
             raise ValidationError('poster_uri', uri)
         self._poster_uri = uri
 
@@ -205,7 +206,7 @@ class Film(Base):
 
     @trailer_uri.setter
     def trailer_uri(self, uri):
-        if not validate_uri(uri):
+        if uri and not validate_uri(uri):
             raise ValidationError('trailer_uri', uri)
         self._trailer_uri = uri
 
@@ -218,7 +219,7 @@ class Film(Base):
 
     @wiki_uri.setter
     def wiki_uri(self, uri):
-        if not validate_uri(uri):
+        if uri and not validate_uri(uri):
             raise ValidationError('wiki_uri', uri)
         self._wiki_uri = uri
 

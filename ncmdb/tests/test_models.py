@@ -87,6 +87,17 @@ class TestPersonModel(SQLiteTestCase):
             with self.assertRaises(ValidationError):
                 person.img_uri = uri
 
+    def test_poster_uri_sets_none_uri(self):
+        """Person.image_uri does not raise an exception for 'None' values
+        """
+        from ..models import Person
+        person = Person()
+        from ..exceptions import ValidationError
+        try:
+            person.img_uri = None
+        except ValidationError as err:
+            self.fail(err.msg)
+
     def test_serialize_works(self):
         """Person.serialized returns a complete dict
         """
@@ -117,11 +128,11 @@ class TestFilmModel(SQLiteTestCase):
         """Film can successfully save to and be retrieved from SQLite
         """
         film_title = 'Leaving Las Vegas'
-        film_logline = 'An alcoholic Hollywood screenwriter who lost everything' \
+        film_plot = 'An alcoholic Hollywood screenwriter who lost everything' \
                        'forms an uneasy relationship with a prostitute in Las' \
                        'Vegas as he endeavors to drink himself to death.'
         from ..models import Film
-        leaving_lv = Film(title=film_title, description=film_logline)
+        leaving_lv = Film(title=film_title, plot=film_plot)
         DBSession.add(leaving_lv)
         DBSession.commit()
         self.assertIsInstance(leaving_lv, Film)
@@ -157,6 +168,8 @@ class TestFilmModel(SQLiteTestCase):
             DBSession.commit()
 
     def test_year_field(self):
+        """Film.year sets a valid year
+        """
         film_title = 'Leaving Las Vegas'
         from ..models import Film
         leaving_lv = Film(title=film_title, year=1995)
@@ -194,15 +207,15 @@ class TestFilmModel(SQLiteTestCase):
 
     def test_logline_field(self):
         film_title = 'Leaving Las Vegas'
-        film_logline = 'An alcoholic Hollywood screenwriter who lost everything' \
+        film_plot = 'An alcoholic Hollywood screenwriter who lost everything' \
                        'forms an uneasy relationship with a prostitute in Las' \
                        'Vegas as he endeavors to drink himself to death.'
         from ..models import Film
-        leaving_lv = Film(title=film_title, description=film_logline)
+        leaving_lv = Film(title=film_title, plot=film_plot)
         DBSession.add(leaving_lv)
         DBSession.commit()
         result = DBSession.query(Film).filter_by(id=leaving_lv.id).first()
-        self.assertEqual(film_logline, result.description)
+        self.assertEqual(film_plot, result.plot)
 
     def test_poster_uri_sets_valid_uri(self):
         """Film.poster_uri sets a valid URI without raising an exception
@@ -219,7 +232,7 @@ class TestFilmModel(SQLiteTestCase):
             self.assertEqual(uri, film.poster_uri)
 
     def test_poster_uri_field_raises_exception_with_invalid_uri(self):
-        """Film.poster_uri raises an exception with an invalid uri
+        """Film.poster_uri raises an exception with an invalid URI
         """
         from ..models import Film
         film = Film()
@@ -228,6 +241,17 @@ class TestFilmModel(SQLiteTestCase):
         for uri in BAD_URIS:
             with self.assertRaises(ValidationError):
                 film.poster_uri = uri
+
+    def test_poster_uri_sets_none_uri(self):
+        """Film.poster_uri does not raise an exception for 'None' values
+        """
+        from ..models import Film
+        film = Film()
+        from ..exceptions import ValidationError
+        try:
+            film.poster_uri = None
+        except ValidationError as err:
+            self.fail(err.msg)
 
     def test_trailer_uri_sets_valid_uri(self):
         """Film.trailer_uri sets a valid URI without raising an exception
@@ -254,6 +278,17 @@ class TestFilmModel(SQLiteTestCase):
             with self.assertRaises(ValidationError):
                 film.trailer_uri = uri
 
+    def test_trailer_uri_sets_none_uri(self):
+        """Film.trailer_uri does not raise an exception for 'None' values
+        """
+        from ..models import Film
+        film = Film()
+        from ..exceptions import ValidationError
+        try:
+            film.trailer_uri = None
+        except ValidationError as err:
+            self.fail(err.msg)
+
     def test_wiki_uri_sets_valid_uri(self):
         """Film.wiki_uri sets a valid URI without raising an exception
         """
@@ -278,6 +313,17 @@ class TestFilmModel(SQLiteTestCase):
         for uri in BAD_URIS:
             with self.assertRaises(ValidationError):
                 film.wiki_uri = uri
+
+    def test_wiki_uri_sets_none_uri(self):
+        """Film.wiki_uri does not raise an exception for 'None' values
+        """
+        from ..models import Film
+        film = Film()
+        from ..exceptions import ValidationError
+        try:
+            film.wiki_uri = None
+        except ValidationError as err:
+            self.fail(err.msg)
 
     @attr('todo')
     def test_serialize_works(self):
