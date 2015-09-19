@@ -1,4 +1,5 @@
 __author__ = 'kobnar'
+
 from unittest import TestCase
 
 
@@ -9,14 +10,8 @@ class ValidateURITests(TestCase):
     """
     def test_good_uris_pass(self):
         from ..validators import validate_uri
-        from . import PROFILE_URIS
-        for uri in PROFILE_URIS:
-            self.assertIsNotNone(validate_uri(uri))
-        from . import POSTER_URIS
-        for uri in POSTER_URIS:
-            self.assertIsNotNone(validate_uri(uri))
-        from . import WIKI_URIS
-        for uri in WIKI_URIS:
+        from . import PROFILE_URIS, POSTER_URIS, WIKI_URIS
+        for uri in PROFILE_URIS + POSTER_URIS + WIKI_URIS:
             self.assertIsNotNone(validate_uri(uri))
 
     def test_bad_uris_fail(self):
