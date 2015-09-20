@@ -4,7 +4,7 @@ from pyramid.view import view_defaults, view_config
 from pyramid.httpexceptions import HTTPNotFound, HTTPCreated, HTTPBadRequest
 from colander import Invalid
 
-from .resources import PersonTableResource, PersonRowResource,\
+from .resources import IndexResource, PersonTableResource, PersonRowResource,\
     FilmTableResource, FilmRowResource
 from .schema import IdSchema, CreatePersonRowSchema, UpdatePersonRowSchema,\
     RetrievePersonRowSchema, CreateFilmRowSchema, UpdateFilmRowSchema,\
@@ -19,6 +19,18 @@ class BaseView(object):
     def __init__(self, context, request):
         self.context = context
         self.request = request
+
+
+@view_defaults(context=IndexResource)
+class IndexViews(BaseView):
+    """/
+    """
+
+    @view_config(renderer='index/home.jinja2')
+    def home(self):
+        film_resource = FilmTableResource(self.context, 'films')
+        films = [x.serialize() for x in film_resource.retrieve()]
+        return {'films': films}
 
 
 @view_defaults(context=PersonTableResource, renderer='json')
@@ -146,7 +158,7 @@ class FilmAPIIndexViews(BaseView):
 
 
 @view_defaults(context=FilmRowResource, renderer='json')
-class FilmAPIViews(BaseView):
+class FilmsAPIViews(BaseView):
     """/api/v1/films/{#}/
     """
 
