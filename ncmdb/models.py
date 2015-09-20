@@ -86,7 +86,19 @@ class Person(Base):
             raise ValidationError('poster_uri', uri)
         self._img_uri = uri
 
-    def __json__(self, request):
+    @staticmethod
+    def _serialize_field(key, value, trim):
+        output = {}
+        if value:
+            if type(value) is int or type(value[0]) is not Film:
+                output[key] = value
+            else:
+                output[key] = [x.title for x in value]
+        elif not trim:
+            output[key] = None
+        return output
+
+    def serialize(self, trim=True):
         """
         A custom JSON serializing method.
         """
@@ -96,12 +108,11 @@ class Person(Base):
         }
         for key in self.FIELD_CHOICES:
             value = getattr(self, key)
-            if value:
-                if type(value[0]) == Film:
-                    output[key] = [x.title for x in value]
-                else:
-                    output[key] = value
+            output.update(self._serialize_field(key, value, trim))
         return output
+
+    def __json__(self, request):
+        return self.serialize()
 
 
 class Film(Base):
@@ -284,7 +295,19 @@ class Film(Base):
             raise ValidationError('wiki_uri', uri)
         self._wiki_uri = uri
 
-    def __json__(self, request):
+    @staticmethod
+    def _serialize_field(key, value, trim):
+        output = {}
+        if value:
+            if type(value) is int or type(value[0]) is not Person:
+                output[key] = value
+            else:
+                output[key] = [x.name for x in value]
+        elif not trim:
+            output[key] = None
+        return output
+
+    def serialize(self, trim=True):
         """
         A custom JSON serializing method.
         """
@@ -294,9 +317,8 @@ class Film(Base):
         }
         for key in self.FIELD_CHOICES:
             value = getattr(self, key)
-            if value:
-                if type(value) is int or type(value[0]) is not Person:
-                    output[key] = value
-                else:
-                    output[key] = [x.name for x in value]
+            output.update(self._serialize_field(key, value, trim))
         return output
+
+    def __json__(self, request):
+        return self.serialize()
