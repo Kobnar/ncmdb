@@ -1,0 +1,39 @@
+{% extends "index.jinja2" %}
+{% block page_content %}
+<div class="container">
+
+    <h1>Nicolas Cage Movie Database</h1>
+
+    <p>Welcome to the Nicolas Cage Movie Database!</p>
+
+    {% for film in films %}
+    <div class="col-md-12">
+        <div>
+            <div class="col-md-3">
+                {% if film.poster_uri %}
+                    <img class="poster" src="{{ film.poster_uri }}">
+                {% else %}
+                    <img class="poster" src="{{ request.static_url('ncmdb:static/img/missing_poster.png') }}">
+                {% endif %}
+            </div>
+            <div class="col-md-9">
+                <h2><em>{{ film.title }}</em> ({{ film.year }})</h2>
+                <p>{{ film.rating }} | {{ film.runtime }} min.</p>
+                <hr />
+                <p>{{ film.plot }}</p>
+                <p><strong>Directed by:</strong> {{ ', '.join(film.directors) }}<br />
+                <strong>Written by:</strong> {{ ', '.join(film.writers) }}<br />
+                <strong>Starring:</strong> {{ ', '.join(film.cast) }}</p>
+                {% if film.trailer_uri %}
+                    <a href="{{ film.trailer_uri }}" class="btn btn-primary">Watch Trailer</a>
+                {% endif %}
+                {% if film.wiki_uri %}
+                    <a href="{{ film.wiki_uri }}" class="btn btn-default">Wikipedia</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+</div>
+{% endblock %}
