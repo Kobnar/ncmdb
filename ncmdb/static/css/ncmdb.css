@@ -2,14 +2,14 @@
 ----------------------------------------------------------------------------- */
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 body {
-  padding-top: 70px;
-  /* Margin bottom by footer height */
-  margin-bottom: 60px;
-  font-family: "Open Sans";
+    padding-top: 70px;
+    /* Margin bottom by footer height */
+    margin-bottom: 60px;
+    font-family: "Open Sans";
 }
 
 /* Header
@@ -19,12 +19,12 @@ body {
 /* Footer
 ----------------------------------------------------------------------------- */
 .footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  /* Set the fixed height of the footer here */
-  height: 60px;
-  background-color: #f5f5f5;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    /* Set the fixed height of the footer here */
+    height: 60px;
+    background-color: #f5f5f5;
 }
 
 
@@ -32,6 +32,13 @@ body {
 ----------------------------------------------------------------------------- */
 
 .poster {
-  padding: 15px;
-  width: 100%;
+    padding: 15px;
+    width: 100%;
+}
+
+/* Films
+----------------------------------------------------------------------------- */
+
+.modal {
+    padding-top: 10%;
 }

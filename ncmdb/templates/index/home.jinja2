@@ -1,11 +1,6 @@
 {% extends "index.jinja2" %}
 {% block page_content %}
 <div class="container">
-
-    <h1>Nicolas Cage Movie Database</h1>
-
-    <p>Welcome to the Nicolas Cage Movie Database!</p>
-
     {% for film in films %}
     <div class="col-md-12">
         <div>
@@ -17,15 +12,16 @@
                 {% endif %}
             </div>
             <div class="col-md-9">
-                <h2><em>{{ film.title }}</em> ({{ film.year }})</h2>
-                <p>{{ film.rating }} | {{ film.runtime }} min.</p>
+                <h2>
+                    <em>{{ film.title }}</em> ({{ film.year }})</h2>
+                <p>{% if film.rating %}{{ film.rating }} | {% endif %}{{ film.runtime }} min.</p>
                 <hr />
                 <p>{{ film.plot }}</p>
                 <p><strong>Directed by:</strong> {{ ', '.join(film.directors) }}<br />
                 <strong>Written by:</strong> {{ ', '.join(film.writers) }}<br />
                 <strong>Starring:</strong> {{ ', '.join(film.cast) }}</p>
                 {% if film.trailer_uri %}
-                    <a href="{{ film.trailer_uri }}" class="btn btn-primary">Watch Trailer</a>
+                    <a href="{{ film.trailer_uri }}?autoplay=1&html5=1" data-toggle="modal" data-target="#lightbox" class="btn btn-primary">Watch Trailer</a>
                 {% endif %}
                 {% if film.wiki_uri %}
                     <a href="{{ film.wiki_uri }}" class="btn btn-default">Wikipedia</a>
@@ -33,7 +29,20 @@
             </div>
         </div>
     </div>
-{% endfor %}
+    {% endfor %}
 
+    <div id="lightbox" class="modal fade" tabindex="-1" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <a href="#" class="hanging-close" data-dismiss="modal" aria-hidden="true">
+                <div class="modal-body">
+                    <div id="trailerVideoContainer" class="embed-responsive embed-responsive-16by9"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+{% endblock %}
+{% block scripts %}
+    <script src="{{ request.static_url('ncmdb:static/js/lightbox.js') }}"></script>
 {% endblock %}
