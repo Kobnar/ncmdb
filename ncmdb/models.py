@@ -87,15 +87,15 @@ class Person(Base):
         self._img_uri = uri
 
     @staticmethod
-    def _serialize_field(key, value, trim):
+    def _serialize_field(field, value, trim):
         output = {}
         if value:
-            if type(value) is int or type(value[0]) is not Film:
-                output[key] = value
+            if type(value) is not int and type(value[0]) is Film:
+                output[field] = [x.title for x in value]
             else:
-                output[key] = [x.title for x in value]
+                output[field] = value
         elif not trim:
-            output[key] = None
+            output[field] = None
         return output
 
     def serialize(self, trim=True):
@@ -296,15 +296,15 @@ class Film(Base):
         self._wiki_uri = uri
 
     @staticmethod
-    def _serialize_field(key, value, trim):
+    def _serialize_field(field, value, trim):
         output = {}
         if value:
-            if type(value) is int or type(value[0]) is not Person:
-                output[key] = value
+            if type(value) is not int and type(value[0]) is Person:
+                output[field] = [x.name for x in value]
             else:
-                output[key] = [x.name for x in value]
+                output[field] = value
         elif not trim:
-            output[key] = None
+            output[field] = None
         return output
 
     def serialize(self, trim=True):
