@@ -1,6 +1,7 @@
 __author__ = 'kobnar'
 
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import joinedload
 
 from .models import DBSession, Person, Film
 
@@ -86,7 +87,9 @@ class RowResource(IndexResource):
 
     @property
     def _query(self):
-        return self._db.query(self.table).filter_by(id=self.id)
+        return self._db.query(self.table).\
+            options(joinedload('*')).\
+            filter_by(id=self.id)
 
 
 class TableResource(IndexResource):
@@ -143,10 +146,10 @@ class TableResource(IndexResource):
         else:
             valid_data = {k: v for k, v in row_data.items()
                           if k in self.table.FIELD_CHOICES and v is not None}
-        query = self._db.query(self.table)
+        query = self._db.query(self.table).options(joinedload('*'))
         for field, value in valid_data.items():
-            query = query.filter(
-                getattr(self.table, field).like('%%%s%%' % value))
+            query = query.\
+                filter(getattr(self.table, field).like('%%%s%%' % value))
         return [x for x in query]
 
 
