@@ -194,10 +194,10 @@ class TestFilmModel(SQLiteTestCase):
         DBSession.add(leaving_lv)
         DBSession.commit()
         result = DBSession.query(Film).filter_by(id=leaving_lv.id).first()
-        self.assertEqual(112, result.running_time)
+        self.assertEqual(112, result.runtime)
 
     def test_running_time_field_cannot_be_negative(self):
-        """Film.running_time raises ValidationError if the value is negative
+        """Film.runtime raises ValidationError if the value is negative
         """
         film_title = 'Leaving Las Vegas'
         from ..models import Film

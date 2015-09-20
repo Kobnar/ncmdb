@@ -202,7 +202,7 @@ class CreateFilmSchemaTests(TestCase):
         data = self.schema.deserialize(self.params)
         self.assertEqual(data['rating'], None)
         self.assertEqual(data['year'], None)
-        self.assertEqual(data['running_time'], None)
+        self.assertEqual(data['runtime'], None)
         self.assertEqual(data['producers'], None)
         self.assertEqual(data['directors'], None)
         self.assertEqual(data['writers'], None)

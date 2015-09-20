@@ -118,7 +118,7 @@ class Film(Base):
         'plot',
         'rating',
         'year',
-        'running_time',
+        'runtime',
         'producers',
         'directors',
         'writers',
@@ -137,7 +137,7 @@ class Film(Base):
     plot = Column(Text)
     rating = Column(Text)
     _year = Column(Integer)
-    _running_time = Column(Integer)
+    _runtime = Column(Integer)
 
     # Remote data:
     _poster_uri = Column(Text)
@@ -172,17 +172,17 @@ class Film(Base):
         self._year = year
 
     @hybrid_property
-    def running_time(self):
+    def runtime(self):
         """
         The total running time of this film (in minutes).
         """
-        return self._running_time
+        return self._runtime
 
-    @running_time.setter
-    def running_time(self, running_time):
+    @runtime.setter
+    def runtime(self, running_time):
         if running_time and running_time < 0:
-            raise ValidationError('running_time', running_time)
-        self._running_time = running_time
+            raise ValidationError('runtime', running_time)
+        self._runtime = running_time
 
     @hybrid_property
     def producers(self):
