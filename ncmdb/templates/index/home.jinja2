@@ -14,7 +14,9 @@
             <div class="col-md-9">
                 <h2>
                     <em>{{ film.title }}</em> ({{ film.year }})</h2>
-                <p>{% if film.rating %}{{ film.rating }} | {% endif %}{{ film.runtime }} min.</p>
+                <p>{% if film.rating %}{{ film.rating }}{% endif %}
+                    {% if film.rating and film.runtime %} | {% endif %}
+                    {% if film.runtime %}{{ film.runtime }} min.{% endif %}</p>
                 <hr />
                 <p>{{ film.plot }}</p>
                 <p><strong>Directed by:</strong> {{ ', '.join(film.directors) }}<br />
