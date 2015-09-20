@@ -20,11 +20,11 @@
                 <p><strong>Directed by:</strong> {{ ', '.join(film.directors) }}<br />
                 <strong>Written by:</strong> {{ ', '.join(film.writers) }}<br />
                 <strong>Starring:</strong> {{ ', '.join(film.cast) }}</p>
-                {% if film.trailer_uri %}
-                    <a href="{{ film.trailer_uri }}?autoplay=1&html5=1" data-toggle="modal" data-target="#lightbox" class="btn btn-primary">Watch Trailer</a>
-                {% endif %}
                 {% if film.wiki_uri %}
                     <a href="{{ film.wiki_uri }}" class="btn btn-default">Wikipedia</a>
+                {% endif %}
+                {% if film.trailer_uri %}
+                    <a href="{{ film.trailer_uri }}" data-toggle="modal" data-target="#lightbox" class="btn btn-primary">Watch Trailer</a>
                 {% endif %}
             </div>
         </div>
