@@ -18,6 +18,11 @@ body {
 
 /* Footer
 ----------------------------------------------------------------------------- */
+
+.text-muted {
+  margin: 20px 0;
+}
+
 .footer {
     position: absolute;
     bottom: 0;
