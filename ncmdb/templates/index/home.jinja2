@@ -24,7 +24,7 @@
                     <strong>Written by:</strong> {{ ', '.join(film.writers) }}<br />
                     <strong>Starring:</strong> {{ ', '.join(film.cast) }}</p>
                     {% if film.wiki_uri %}
-                        <a href="{{ film.wiki_uri }}" class="btn btn-default">Wikipedia</a>
+                        <a href="{{ film.wiki_uri }}" class="btn btn-default" target="_blank">Wikipedia</a>
                     {% endif %}
                     {% if film.trailer_uri %}
                         <a href="{{ film.trailer_uri }}" data-toggle="modal" data-target="#lightbox" class="btn btn-primary">Watch Trailer</a>
