@@ -1,3 +1,8 @@
+__author__ = 'kobnar'
+
+import os
+import re
+from urllib.request import urlretrieve
 from sqlalchemy import Table, Column, Integer, Text, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -8,9 +13,17 @@ from .exceptions import ValidationError
 from .validators import validate_uri
 
 
+# Used for image caching:
+_CACHE_PATH = 'ncmdb/static/img/cache/'
+_IMG_REGEX = re.compile('([^/]+\.jpg)$')
+
+
+# SQLAlchemy session management:
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
 
+
+# M2M relationships:
 
 producer_credit = Table(
     'producer_credit', Base.metadata,
@@ -39,8 +52,7 @@ editor_credit = Table(
 cast_credit = Table(
     'cast_credit', Base.metadata,
     Column('film', Integer, ForeignKey('film.id')),
-    Column('actor', Integer, ForeignKey('person.id')),
-    Column('role', Text))
+    Column('actor', Integer, ForeignKey('person.id')))
 
 
 musician_credit = Table(
@@ -48,6 +60,8 @@ musician_credit = Table(
     Column('film', Integer, ForeignKey('film.id')),
     Column('writer', Integer, ForeignKey('person.id')))
 
+
+# SQL Tables:
 
 class Person(Base):
     """
@@ -60,7 +74,8 @@ class Person(Base):
 
     FIELD_CHOICES = [
         'name',
-        'img_uri',
+        'image_uri',
+        'image_cache',
         'producer_credits',
         'director_credits',
         'writer_credits',
@@ -71,20 +86,45 @@ class Person(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(Text, unique=True, nullable=False)
-    _img_uri = Column(Text)
+    _image_uri = Column(Text)
+    _image_cache = Column(Text)
 
     @hybrid_property
-    def img_uri(self):
+    def image_uri(self):
         """
         A URI pointing to a remote profile image for this person.
         """
-        return self._img_uri
+        return self._image_uri
 
-    @img_uri.setter
-    def img_uri(self, uri):
+    @image_uri.setter
+    def image_uri(self, uri):
         if uri and not validate_uri(uri):
             raise ValidationError('poster_uri', uri)
-        self._img_uri = uri
+        self._image_uri = uri
+
+    def fetch_image(self):
+        """
+        A method designed to create a local cache of this person's profile
+        image.
+        """
+        if self._image_cache:
+            file_name = '{}.jpg'.format(self.id)
+            os.makedirs(self.CACHE_PATH, exist_ok=True)
+            urlretrieve(self.image_uri, self.CACHE_PATH + file_name)
+            self._image_cache = file_name
+            return self._image_cache
+
+    @hybrid_property
+    def image_cache(self):
+        """
+        A URI pointing to the locale cache of the poster_cache for this film.
+
+        NOTE: If no local cache exists, this property automatically calls
+        `Film.fetch_poster()` to create one.
+        """
+        if not self._image_cache:
+            self.fetch_image()
+        return self._image_cache
 
     @staticmethod
     def _serialize_field(field, value, trim):
@@ -124,6 +164,8 @@ class Film(Base):
 
     __tablename__ = 'film'
 
+    CACHE_PATH = _CACHE_PATH + 'posters/'
+
     FIELD_CHOICES = [
         'title',
         'plot',
@@ -137,6 +179,7 @@ class Film(Base):
         'cast',
         'musicians',
         'poster_uri',
+        'poster_cache',
         'trailer_uri',
         'wiki_uri',
     ]
@@ -149,6 +192,7 @@ class Film(Base):
     rating = Column(Text)
     _year = Column(Integer)
     _runtime = Column(Integer)
+    _poster_cache = Column(Text)
 
     # Remote data:
     _poster_uri = Column(Text)
@@ -259,7 +303,7 @@ class Film(Base):
     @hybrid_property
     def poster_uri(self):
         """
-        A URI pointing to a remote poster image for this film.
+        A URI pointing to a remote poster_cache image for this film.
         """
         return self._poster_uri
 
@@ -268,6 +312,30 @@ class Film(Base):
         if uri and not validate_uri(uri):
             raise ValidationError('poster_uri', uri)
         self._poster_uri = uri
+
+    def fetch_poster(self):
+        """
+        A method designed to fetch a poster_cache image based on the URI provided in
+        `Film.poster_uri`.
+        """
+        if self._poster_uri:
+            file_name = '{}.jpg'.format(self.id)
+            os.makedirs(self.CACHE_PATH, exist_ok=True)
+            urlretrieve(self.poster_uri, self.CACHE_PATH + file_name)
+            self._poster_cache = file_name
+            return self._poster_cache
+
+    @hybrid_property
+    def poster_cache(self):
+        """
+        A URI pointing to the locale cache of the poster_cache for this film.
+
+        NOTE: If no local cache exists, this property automatically calls
+        `Film.fetch_poster()` to create one.
+        """
+        if not self._poster_cache:
+            self.fetch_poster()
+        return self._poster_cache
 
     @hybrid_property
     def trailer_uri(self):

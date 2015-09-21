@@ -26,7 +26,6 @@ class NCMDBManager(BaseManager):
     DATA_PATH = 'ncmdb/scripts/ncmdb.json'
 
     def __init__(self):
-        self.films = set()
         self.people = set()
 
     def backup(self):
@@ -89,7 +88,7 @@ class NCMDBManager(BaseManager):
                 print('\t{}'.format(person_data['name']))
                 person = Person()
                 person.name = person_data['name']
-                person.img_uri = person_data['img_uri']
+                person.image_uri = person_data['image_uri']
                 self.SESSION.add(person)
                 self.people.add(person_data['name'])
             self.SESSION.commit()
@@ -112,3 +111,8 @@ class NCMDBManager(BaseManager):
                 _link_person(film, 'cast', film_data['cast'])
                 _link_person(film, 'musicians', film_data['musicians'])
             self.SESSION.commit()
+        print('Fetching images...')
+        for film in self.SESSION.query(Film):
+            print('\tFetching {}'.format(film.poster_uri))
+            film.fetch_poster()
+        self.SESSION.commit()
