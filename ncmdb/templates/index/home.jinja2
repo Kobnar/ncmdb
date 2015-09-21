@@ -6,8 +6,8 @@
         <div class="col-md-12">
             <div>
                 <div class="col-md-3">
-                    {% if film.poster %}
-                        <img class="poster" src="{{ request.static_url('ncmdb:static/img/cache/posters/' + film.poster) }}">
+                    {% if film.poster_cache %}
+                        <img class="poster" src="{{ request.static_url('ncmdb:static/img/cache/posters/' + film.poster_cache) }}">
                     {% else %}
                         <img class="poster" src="{{ request.static_url('ncmdb:static/img/missing_poster.png') }}">
                     {% endif %}
