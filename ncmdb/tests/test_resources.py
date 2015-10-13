@@ -1,15 +1,398 @@
-__author__ = 'kobnar'
+from unittest import TestCase
 from nose.plugins.attrib import attr
+from ..resources import IndexResource, RowResource, TableResource
+from . import DBSession, SQLiteTestCase, MockTable
 
-from . import DBSession, SQLiteTestCase
+__author__ = 'kobnar'
 
 
-class PersonResourceTestCase(SQLiteTestCase):
+class _MockResourceTable(MockTable):
+    """
+    A mock resource table used for integration testing Pyramid's traversal
+    resources.
+    """
+    FIELD_CHOICES = ['name']
+    from sqlalchemy import Column, String
+    name = Column(String)
+    __mapper_args__ = {
+        'polymorphic_identity': 'mock_res_table'
+    }
+
+
+class _MockRowResource(RowResource):
+    """
+    A mock row resource for testing traversal resources.
+    """
+
+
+class _MockTableResource(TableResource):
+    """
+    A mock table resource for testing traversal resources.
+    """
+    _table = _MockResourceTable
+    _row_resource = _MockRowResource
+
+
+class IndexResourceTestCase(TestCase):
+    """
+    Unit tests for :class:`resources.IndexResource`.
+    """
+
+    def make_root(self):
+        self.root = IndexResource(None, 'root')
+
+    def test_init_sets_parent(self):
+        """IndexResource.__init__() sets the correct parent
+        """
+        self.make_root()
+        child = IndexResource(self.root, 'child')
+        self.assertEqual(child.__parent__, self.root)
+
+    def test_init_parent_accepts_none(self):
+        """IndexResource.__init__() accepts 'None' as 'parent'
+        """
+        try:
+            IndexResource(None, 'root')
+        except TypeError as err:
+            self.fail(err)
+
+    def test_init_parent_accepts_index_resource(self):
+        """IndexResource.__init__() accepts an IndexResource as 'parent'
+        """
+        self.make_root()
+        try:
+            IndexResource(self.root, 'index')
+        except TypeError as err:
+            self.fail(err)
+
+    def test_init_parent_raises_exception_if_parent_is_bad_type(self):
+        """IndexResource.__init__() raises an exception if 'parent' is not an IndexResource or 'None'
+        """
+        non_strings = [
+            False,
+            True,
+            1,
+            1.1,
+            'string']
+        for x in non_strings:
+            with self.assertRaises(TypeError):
+                IndexResource(x, 'index')
+
+    def test_init_name_accepts_string(self):
+        """IndexResource.__init__() accepts a string as 'name'
+        """
+        try:
+            IndexResource(None, 'index')
+        except TypeError as err:
+            self.fail(err)
+
+    def test_init_sets_name(self):
+        """IndexResource.__init__() sets the correct name
+        """
+        self.make_root()
+        child = IndexResource(self.root, 'child')
+        self.assertEqual(child.__name__, 'child')
+
+    def test_init_name_raises_exception_for_non_strings(self):
+        """IndexResource.__init__() raises  an exception if 'name' is not a string
+        """
+        non_strings = [
+            None,
+            False,
+            True,
+            1, 1.1,
+            IndexResource(None, 'index')]
+        for x in non_strings:
+            with self.assertRaises(TypeError):
+                IndexResource(None, x)
+
+    def test_setitem_sets_names(self):
+        """IndexResource.__setitem__() sets the correct name
+        """
+        self.make_root()
+        self.root['1'] = IndexResource
+        self.root['1']['1.1'] = IndexResource
+        self.root['2'] = IndexResource
+        self.root['2']['2.1'] = IndexResource
+        self.root['2']['2.1']['2.1.1'] = IndexResource
+        self.root['2']['2.2'] = IndexResource
+        self.assertEqual(
+            self.root['1'].__name__,
+            '1')
+        self.assertEqual(
+            self.root['1']['1.1'].__name__,
+            '1.1')
+        self.assertEqual(
+            self.root['2'].__name__,
+            '2')
+        self.assertEqual(
+            self.root['2']['2.1'].__name__,
+            '2.1')
+        self.assertEqual(
+            self.root['2']['2.1']['2.1.1'].__name__,
+            '2.1.1')
+        self.assertEqual(
+            self.root['2']['2.2'].__name__,
+            '2.2')
+
+    def test_setitem_sets_parents(self):
+        """IndexResource.__setitem__() sets the correct parent
+        """
+        self.make_root()
+        self.root['1'] = IndexResource
+        self.root['1']['1.1'] = IndexResource
+        self.root['2'] = IndexResource
+        self.root['2']['2.1'] = IndexResource
+        self.root['2']['2.1']['2.1.1'] = IndexResource
+        self.root['2']['2.2'] = IndexResource
+        self.assertEqual(
+            self.root['1'].__parent__,
+            self.root)
+        self.assertEqual(
+            self.root['1']['1.1'].__parent__,
+            self.root['1'])
+        self.assertEqual(
+            self.root['2'].__parent__,
+            self.root)
+        self.assertEqual(
+            self.root['2']['2.1'].__parent__,
+            self.root['2'])
+        self.assertEqual(
+            self.root['2']['2.1']['2.1.1'].__parent__,
+            self.root['2']['2.1'])
+        self.assertEqual(
+            self.root['2']['2.2'].__parent__,
+            self.root['2'])
+
+    def test_setitem_raises_exception_if_item_is_not_an_indexresource(self):
+        """IndexResource.__setitem__() raises an exception if the item is not a type of IndexResource
+        """
+        self.make_root()
+        from ..models import Person
+        with self.assertRaises(TypeError):
+            self.root['index'] = Person
+
+
+class _MockResourceTestCase(SQLiteTestCase):
+    """
+    A wrapper to setup test data for resource tests.
+    """
+    def setUp(self):
+        super(_MockResourceTestCase, self).setUp()
+        self.tbl_rec = _MockTableResource(None, 'mock_table', DBSession)
+
+    def make_data(self):
+        self.row_names = ['doc 1', 'document 2', 'dox 3']
+        for name in self.row_names:
+            doc = _MockResourceTable(name=name)
+            DBSession.add(doc)
+        DBSession.flush()
+        query = DBSession.query(_MockResourceTable).all()
+        self.row_ids = [x.id for x in query]
+
+
+@attr('sqlalchemy')
+class TableResourceTests(_MockResourceTestCase):
+    """
+    Integration tests for :class:`resources.TableResource`.
+    """
+
+    def test_getitem_accepts_int(self):
+        """TableResource.__getitem__() accepts an integer
+        """
+        id = 123
+        try:
+            self.tbl_rec[id]
+        except KeyError as err:
+            self.fail(err)
+
+    def test_getitem_accepts_int_string(self):
+        """TableResource.__getitem__() accepts a string-formatted integer
+        """
+        id = '123'
+        try:
+            self.tbl_rec[id]
+        except KeyError as err:
+            self.fail(err)
+
+    def test_getitem_returns_child_index(self):
+        """TableResource.__getitem__() returns a child IndexResource if it is not an integer
+        """
+        self.tbl_rec['index'] = IndexResource
+        result = self.tbl_rec['index']
+        self.assertIsInstance(result, IndexResource)
+        self.assertEqual(result.__name__, 'index')
+
+    def test_getitem_raises_key_error_for_invalid_int_string_if_not_child(self):
+        """TableResource.__getitem__() raises `KeyError` if `name' is not an ObjectId or child name
+        """
+        with self.assertRaises(KeyError):
+            self.tbl_rec['nonsense']
+
+    def test_table_is_read_only(self):
+        """TableResource.table is read-only
+        """
+        with self.assertRaises(AttributeError):
+            self.tbl_rec.table = _MockResourceTable
+
+    def test_table_is_set(self):
+        """TableResource.table is set correctly
+        """
+        self.assertEqual(self.tbl_rec.table, _MockResourceTable)
+
+    def test_create_requires_data(self):
+        """TableResource.create() raises exception if no data is provided
+        """
+        with self.assertRaises(AssertionError):
+            self.tbl_rec.create(None)
+
+    def test_create_returns_mock_row(self):
+        """TableResource.create() returns a new row object
+        """
+        data = {'name': 'doc 4'}
+        row = self.tbl_rec.create(data)
+        self.assertIsInstance(row, _MockResourceTable)
+
+    def test_create_sets_value(self):
+        """TableResource.create() sets correct values
+        """
+        data = {'name': 'doc 4'}
+        row = self.tbl_rec.create(data)
+        self.assertEqual(row.name, data['name'])
+
+    def test_create_saves_to_sqlalchemy(self):
+        """TableResource.create() saves a new row in SQLAlchemy
+        """
+        data = {'name': 'doc 4'}
+        row = self.tbl_rec.create(data)
+        result = DBSession.query(_MockResourceTable).filter_by(id=row.id).first()
+        self.assertIsInstance(result, _MockResourceTable)
+
+    def test_create_sets_values_in_sqlalchemy(self):
+        """TableResource.create() sets correct values to new row in SQLAlchemy
+        """
+        data = {'name': 'doc 4'}
+        row = self.tbl_rec.create(data)
+        result = DBSession.query(_MockResourceTable).filter_by(id=row.id).first()
+        self.assertEqual(result.name, row.name)
+
+    def test_retrieve_returns_all_rows_without_query(self):
+        """TableResource.retrieve() returns all rows if no query is provided
+        """
+        self.make_data()
+        results = self.tbl_rec.retrieve()
+        names = [x.name for x in results]
+        self.assertEqual(len(results), 3)
+        for x in results:
+            self.assertIn(x.name, names)
+
+    def test_retrieve_returns_matching_rows(self):
+        """TableResource.retrieve() returns all rows matching query
+        """
+        self.make_data()
+        query = {'name': 'doc'}
+        results = self.tbl_rec.retrieve(query)
+        names = [x.name for x in results]
+        self.assertEqual(len(results), 2)
+        for x in results:
+            self.assertIn(x.name, names)
+
+
+@attr('sqlalchemy')
+class RowResourceTests(_MockResourceTestCase):
+    """
+    Integration tests for :class:`resources.RowResource`.
+    """
+    def setUp(self):
+        super(RowResourceTests, self).setUp()
+        self.make_data()
+        self.row_rec = self.tbl_rec[self.row_ids[0]]
+
+    def test_id_is_read_only(self):
+        """RowResource.id is read-only
+        """
+        with self.assertRaises(AttributeError):
+            self.row_rec.id = 123
+
+    def test_id_is_int(self):
+        """RowResource.id returns an integer
+        """
+        self.assertIsInstance(self.row_rec.id, int)
+
+    def test_id_is_correct_int(self):
+        """RowResource.id is properly set as target ID
+        """
+        self.assertEqual(self.row_rec.id, self.row_ids[0])
+
+    def test_table_is_read_only(self):
+        """RowResource.table is read-only
+        """
+        with self.assertRaises(AttributeError):
+            self.row_rec.table = 'string'
+
+    def test_table_is_parent_table(self):
+        """RowResource.table is the same as it's parent's
+        """
+        self.assertEqual(
+            self.row_rec.table,
+            self.tbl_rec.table)
+
+    def test_retrieve_returns_row(self):
+        """RowResource.retrieve() returns a row if it exists
+        """
+        result = self.row_rec.retrieve()
+        result_id = result.id
+        self.assertIsInstance(result, _MockResourceTable)
+        self.assertEqual(result_id, self.row_ids[0])
+
+    def test_retrieve_returns_none_if_does_not_exist(self):
+        """RowResource.retrieve() returns `None` if row does not exist
+        """
+        obj_id = 999
+        bad_row_rec = self.tbl_rec[obj_id]
+        result = bad_row_rec.retrieve()
+        self.assertIsNone(result)
+
+    def test_update_returns_true(self):
+        """RowResource.update() returns `True` if update was successful
+        """
+        update = {'name': 'new name'}
+        result = self.row_rec.update(update)
+        self.assertTrue(result)
+
+    def test_update_saves_to_sqlite(self):
+        """RowResource.update() saves changes to SQLite
+        """
+        update = {'name': 'new name'}
+        self.row_rec.update(update)
+        result = DBSession.query(_MockResourceTable).filter_by(
+            id=self.row_ids[0]).first()
+        self.assertEqual(result.name, update['name'])
+
+    def test_update_returns_false_if_does_not_exist(self):
+        """RowResource.update() returns `False` if row does not exist
+        """
+        obj_id = 999
+        bad_row_rec = self.tbl_rec[obj_id]
+        update = {'name': 'new name'}
+        result = bad_row_rec.update(update)
+        self.assertFalse(result)
+
+    def test_delete_removes_from_sqlite(self):
+        """RowResource.delete() removes the row from SQLite
+        """
+        self.row_rec.delete()
+        result = DBSession.query(_MockResourceTable).filter_by(
+            id=self.row_ids[0]).first()
+        self.assertFalse(result)
+
+
+class _PersonResourceTestCase(SQLiteTestCase):
     """
     A test case for PersonTableResource and PersonRowResource test suites.
     """
     def setUp(self):
-        super(PersonResourceTestCase, self).setUp()
+        super(_PersonResourceTestCase, self).setUp()
         from ..resources import PersonTableResource
         self.table_resource = PersonTableResource(None, 'people', DBSession)
         self.people = []
@@ -22,10 +405,10 @@ class PersonResourceTestCase(SQLiteTestCase):
         DBSession.commit()
 
 
-class PersonRowResourceTests(PersonResourceTestCase):
+class PersonRowResourceTests(_PersonResourceTestCase):
     """
     Integration tests for :class:`resources.PersonRowResource` (effectively
-    covers all test cases for :class:`resources.RowResource`).
+    duplicates all test cases for :class:`resources.RowResource`).
     """
 
     def test_retrieve_works(self):
@@ -69,25 +452,25 @@ class PersonRowResourceTests(PersonResourceTestCase):
     def test_update_updates_person(self):
         """PersonRowResource.update() successfully updates the correct person
         """
-        changes = {'img_uri': 'https://upload.wikimedia.org/wikipedia/commons/3/33/Nicolas_Cage_2011_CC.jpg'}
+        changes = {'image_uri': 'https://upload.wikimedia.org/wikipedia/commons/3/33/Nicolas_Cage_2011_CC.jpg'}
         row_resource = self.table_resource[2]
         row_resource.update(changes)
         from ..models import Person
         result = DBSession.query(Person).filter_by(id=2).first()
-        self.assertEqual(changes['img_uri'], result.img_uri)
+        self.assertEqual(changes['image_uri'], result.image_uri)
 
     def test_update_only_changes_given_fields(self):
         """PersonRowResource.update() only updates the fields provided
         """
         target = self.people[1]
-        changes = {'img_uri': 'https://upload.wikimedia.org/wikipedia/commons/3/33/Nicolas_Cage_2011_CC.jpg'}
+        changes = {'image_uri': 'https://upload.wikimedia.org/wikipedia/commons/3/33/Nicolas_Cage_2011_CC.jpg'}
         row_resource = self.table_resource[2]
         row_resource.update(changes)
         from ..models import Person
         result = DBSession.query(Person).filter_by(id=2).first()
         self.assertEqual(target.id, result.id)
         self.assertEqual(target.name, result.name)
-        self.assertEqual(target.img_uri, changes['img_uri'])
+        self.assertEqual(target.image_uri, changes['image_uri'])
 
     def test_update_does_nothing_with_unspecificed_fields(self):
         """PersonRowResource.update() completely ignores unspecified fields.
@@ -143,7 +526,7 @@ class PersonRowResourceTests(PersonResourceTestCase):
         row_resource = self.table_resource[1]
         changes = {
             'name': 'Our Lord and Savior, Nicolas Cage',
-            'img_uri': None
+            'image_uri': None
         }
         try:
             row_resource.update(changes)
@@ -172,10 +555,10 @@ class PersonRowResourceTests(PersonResourceTestCase):
         self.assertNotIn(test_id, db_ids)
 
 
-class PersonTableResourceTests(PersonResourceTestCase):
+class PersonTableResourceTests(_PersonResourceTestCase):
     """
     Integration tests for :class:`resources.PersonTableResource` (effectively
-    covers all test cases for :class:`resources.TableResource`).
+    duplicates all test cases for :class:`resources.TableResource`).
     """
 
     def test_table_set(self):
@@ -210,9 +593,9 @@ class PersonTableResourceTests(PersonResourceTestCase):
     def test_create_ignores_unauthorized_fields(self):
         """PersonTableResource.create() ignores unauthorized fields
         """
-        person = {'name': 'Diane Lane', '_img_uri': 'http://www.images.com/something.jpg'}
+        person = {'name': 'Diane Lane', '_image_uri': 'http://www.images.com/something.jpg'}
         result = self.table_resource.create(person)
-        self.assertNotEqual(person['_img_uri'], result.img_uri)
+        self.assertNotEqual(person['_image_uri'], result.image_uri)
 
     def test_create_returns_none_for_unspecified_fields(self):
         """PersonTableResource.create() ignores unspecified fields
@@ -285,6 +668,12 @@ class PersonTableResourceTests(PersonResourceTestCase):
         for idx, person in enumerate(self.people):
             row_resource = self.table_resource[idx]
             self.assertEqual(row_resource.table, Person)
+
+    def test_non_int_does_not_fetch_row_resource(self):
+        """PersonTableresource.__getitem__() does not set a PersonRowResource if child context is not an integer
+        """
+        with self.assertRaises(KeyError):
+            self.table_resource['string']
 
 
 class FilmResourceTestCase(SQLiteTestCase):

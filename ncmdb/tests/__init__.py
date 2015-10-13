@@ -1,15 +1,32 @@
-__author__ = 'kobnar'
-
 from unittest import TestCase
 from sqlalchemy.orm import scoped_session, sessionmaker
-
+from sqlalchemy import Column, Integer, String
 from ..models import Base
 
+__author__ = 'kobnar'
 
 DBSession = scoped_session(sessionmaker())
 
 
+class MockTable(Base):
+    """
+    A simple mock class used to instantiate arbitrary data for integration
+    testing with SQLAlchemy.
+    """
+    __tablename__ = 'mock_table'
+    id = Column(Integer, primary_key=True)
+    type = Column(String)
+    __mapper_args__ = {
+        'polymorphic_on': type,
+        'polymorphic_identity': 'mock_table'
+    }
+
+
 class SQLiteTestCase(TestCase):
+    """
+    A custom test case designed to set up and tear down an in-memory database
+    using SQLAlchemy.
+    """
     def setUp(self):
         from sqlalchemy import create_engine
         engine = create_engine('sqlite:///:memory:')
