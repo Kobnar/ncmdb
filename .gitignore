@@ -141,3 +141,8 @@ crashlytics-build.properties
 
 ### SQLite
 *.sqlite
+
+### NCMDb
+
+# Blocks data fetched from remote sources
+img/cache/*

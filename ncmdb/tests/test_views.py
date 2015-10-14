@@ -154,7 +154,7 @@ class PeopleAPIIndexViewsTests(SQLiteTestCase):
     def test_retrieve_with_invalid_query_returns_400(self):
         """retrieve() should return 400 if one of the query parameters was invalid
         """
-        query = {'img_uri': 'not_a_uri'}
+        query = {'image_uri': 'not_a_uri'}
         self.view.request.GET = query
         self.view.retrieve()
         from pyramid.httpexceptions import HTTPBadRequest
@@ -243,7 +243,7 @@ class PersonAPIViewsTests(SQLiteTestCase):
         result = view.retrieve()
         self.assertTrue('name' in result.keys())
         self.assertFalse('id' in result.keys())
-        self.assertFalse('img_uri' in result.keys())
+        self.assertFalse('image_uri' in result.keys())
         self.assertFalse('producer_credits' in result.keys())
 
 

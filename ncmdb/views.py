@@ -6,9 +6,10 @@ from colander import Invalid
 
 from .resources import IndexResource, PersonTableResource, PersonRowResource,\
     FilmTableResource, FilmRowResource
-from .schema import IdSchema, CreatePersonRowSchema, UpdatePersonRowSchema,\
-    RetrievePersonRowSchema, CreateFilmRowSchema, UpdateFilmRowSchema,\
-    RetrieveFilmRowSchema
+from .schema import IdSchema, CreatePersonSchema, RetrievePeopleSchema, \
+    RetrievePersonSchema, UpdatePersonSchema, \
+    CreateFilmSchema, UpdateFilmSchema, RetrieveFilmsSchema, \
+    RetrieveFilmSchema
 
 
 class BaseView(object):
@@ -28,8 +29,14 @@ class IndexViews(BaseView):
 
     @view_config(renderer='index/home.jinja2')
     def home(self):
+        schema = UpdateFilmSchema()
+        try:
+            data = schema.deserialize(self.request.GET)
+        except Invalid:
+            self.request.response.status_int = HTTPNotFound.code
+            return {'films': []}
         film_resource = FilmTableResource(self.context, 'films')
-        films = [x.serialize() for x in film_resource.retrieve()]
+        films = [x.serialize() for x in film_resource.retrieve(data)]
         return {'films': films}
 
 
@@ -40,7 +47,7 @@ class PeopleAPIIndexViews(BaseView):
 
     @view_config(request_method='POST')
     def create(self):
-        schema = CreatePersonRowSchema()
+        schema = CreatePersonSchema()
         try:
             data = schema.deserialize(self.request.POST)
         except Invalid as err:
@@ -57,7 +64,7 @@ class PeopleAPIIndexViews(BaseView):
 
     @view_config(request_method='GET')
     def retrieve(self):
-        schema = UpdatePersonRowSchema()
+        schema = RetrievePeopleSchema()
         try:
             data = schema.deserialize(self.request.GET)
         except Invalid as err:
@@ -77,7 +84,7 @@ class PersonAPIViews(BaseView):
     @view_config(request_method='GET')
     def retrieve(self):
         id_schema = IdSchema()
-        fields_schema = RetrievePersonRowSchema()
+        fields_schema = RetrievePersonSchema()
         try:
             id_schema.deserialize({'id': self.context.id})
             data = fields_schema.deserialize(self.request.GET)
@@ -96,7 +103,7 @@ class PersonAPIViews(BaseView):
     @view_config(request_method='PUT')
     def update(self):
         id_schema = IdSchema()
-        row_schema = UpdatePersonRowSchema()
+        row_schema = UpdatePersonSchema()
         try:
             id_schema.deserialize({'id': self.context.id})
             data = row_schema.deserialize(self.request.POST)
@@ -128,7 +135,7 @@ class FilmAPIIndexViews(BaseView):
 
     @view_config(request_method='POST')
     def create(self):
-        schema = CreateFilmRowSchema()
+        schema = CreateFilmSchema()
         try:
             data = schema.deserialize(self.request.POST)
         except Invalid as err:
@@ -145,7 +152,7 @@ class FilmAPIIndexViews(BaseView):
 
     @view_config(request_method='GET')
     def retrieve(self):
-        schema = UpdateFilmRowSchema()
+        schema = RetrieveFilmsSchema()
         try:
             data = schema.deserialize(self.request.GET)
         except Invalid as err:
@@ -165,7 +172,7 @@ class FilmsAPIViews(BaseView):
     @view_config(request_method='GET')
     def retrieve(self):
         id_schema = IdSchema()
-        fields_schema = RetrieveFilmRowSchema()
+        fields_schema = RetrieveFilmSchema()
         try:
             id_schema.deserialize({'id': self.context.id})
             data = fields_schema.deserialize(self.request.GET)
@@ -184,7 +191,7 @@ class FilmsAPIViews(BaseView):
     @view_config(request_method='PUT')
     def update(self):
         id_schema = IdSchema()
-        row_schema = UpdateFilmRowSchema()
+        row_schema = UpdateFilmSchema()
         try:
             id_schema.deserialize({'id': self.context.id})
             data = row_schema.deserialize(self.request.POST)

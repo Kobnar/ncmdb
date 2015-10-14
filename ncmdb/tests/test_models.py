@@ -71,10 +71,10 @@ class TestPersonModel(SQLiteTestCase):
         from ..exceptions import ValidationError
         for uri in PROFILE_URIS:
             try:
-                person.img_uri = uri
+                person.image_uri = uri
             except ValidationError:
                 self.fail('Validation error raised: %s' % uri)
-            self.assertEqual(uri, person.img_uri)
+            self.assertEqual(uri, person.image_uri)
 
     def test_img_uri_field_raises_exception_with_invalid_uri(self):
         """Person.image_uri raises an exception with an invalid uri
@@ -85,7 +85,7 @@ class TestPersonModel(SQLiteTestCase):
         from ..exceptions import ValidationError
         for uri in BAD_URIS:
             with self.assertRaises(ValidationError):
-                person.img_uri = uri
+                person.image_uri = uri
 
     def test_poster_uri_sets_none_uri(self):
         """Person.image_uri does not raise an exception for 'None' values
@@ -94,7 +94,7 @@ class TestPersonModel(SQLiteTestCase):
         person = Person()
         from ..exceptions import ValidationError
         try:
-            person.img_uri = None
+            person.image_uri = None
         except ValidationError as err:
             self.fail(err.msg)
 
@@ -103,12 +103,12 @@ class TestPersonModel(SQLiteTestCase):
         """
         fields = {
             'name': 'Nicolas Cage',
-            'img_uri': 'https://upload.wikimedia.org/wikipedia/commons/3/33/Nicolas_Cage_2011_CC.jpg'
+            'image_uri': 'https://upload.wikimedia.org/wikipedia/commons/3/33/Nicolas_Cage_2011_CC.jpg'
         }
         expected = {
             'id': None,
             'name': fields['name'],
-            'img_uri': fields['img_uri'],
+            'image_uri': fields['image_uri'],
             'producer_credits': [],
             'director_credits': [],
             'writer_credits': [],
@@ -377,12 +377,12 @@ class TestFilmModel(SQLiteTestCase):
     def test_serialize_works(self):
         fields = {
             'name': 'Nicolas Cage',
-            'img_uri': 'https://upload.wikimedia.org/wikipedia/commons/3/33/Nicolas_Cage_2011_CC.jpg'
+            'image_uri': 'https://upload.wikimedia.org/wikipedia/commons/3/33/Nicolas_Cage_2011_CC.jpg'
         }
         expected = {
             'id': None,
             'name': fields['name'],
-            'img_uri': fields['img_uri'],
+            'image_uri': fields['image_uri'],
             'producer_credits': [],
             'director_credits': [],
             'writer_credits': [],

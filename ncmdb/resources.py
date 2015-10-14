@@ -1,5 +1,6 @@
+from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, aliased
 from .models import DBSession, Person, Film
 
 __author__ = 'kobnar'
@@ -118,7 +119,6 @@ class RowResource(_SQLResource):
     @property
     def query(self):
         return self.session.query(self.table).\
-            options(joinedload('*')).\
             filter_by(id=self.id)
 
 
@@ -203,8 +203,7 @@ class TableResource(_SQLResource):
         """
         A default, aggressively loaded query object.
         """
-        return self.session.query(self.table).\
-            options(joinedload('*'))
+        return self.session.query(self.table)
 
 
 class PersonRowResource(RowResource):
@@ -221,31 +220,35 @@ class PersonTableResource(TableResource):
         Filters query based on the specific needs of fetching a list of people.
         """
 
-        cred_fields = (
-            'producer_credits',
-            'director_credits',
-            'writer_credits',
-            'editor_credits',
-            'cast_credits'
-        )
-
         # Get query:
         query = self.query
 
-        # Query all people with a similar name string:
+        # Join relationships:
+        query = query.options(joinedload('*'))
+
+        # Query all people with a similar 'name':
         name = row_data.get('name')
         if name:
             query = self.query.filter(
                 Person.name.like('%%{}%%'.format(name)))
 
-        # Query all people with a similar credits:
-        for field in cred_fields:
-            creds = row_data.get(field)
-            if creds:
-                for title in creds:
-                    if title:
-                        query = query.join(getattr(Person, field)).\
-                            filter(Film.title.like('%%{}%%'.format(title)))
+        # Query all people with any similar 'cast_credit':
+        cast_cred = row_data.get('cast_credit')
+        if cast_cred:
+            # TODO: Load all credits, not just cast credits
+            # aliases = []
+            # for field in cred_fields:
+            #     alias = aliased(Film)
+            #     attribute = getattr(Person, field)
+            #     query = query.options(joinedload(attribute))
+            #     query = query.join(alias, attribute)
+            #     aliases.append(alias)
+            # cond = or_(x.title.like('%%{}%%'.format(cred)) for x in aliases)
+            # query = query.filter(cond)
+            query = query.join(
+                Film, Person.cast_credits)
+            query = query.filter(
+                Film.title.like('%%{}%%'.format(cast_cred)))
 
         return query
 
@@ -264,43 +267,25 @@ class FilmTableResource(TableResource):
         Filters query based on the specific needs of fetching a list of films.
         """
 
-        cred_fields = [
-            'producers',
-            'directors',
-            'writers',
-            'editors',
-            'cast',
-            'musicians',
-        ]
-
+        # Get query:
         query = self.query
 
-        # Title contains:
-        if row_data['title']:
-            query = query.filter(
-                Film.title.like('%%{}%%'.format(row_data['title'])))
+        # Join relationships:
+        query = query.options(joinedload('*'))
 
-        # Rating matches:
-        if row_data['rating']:
+        # Filter films with a similar 'title':
+        title = row_data.get('title')
+        if title:
             query = query.filter(
-                Film.rating == row_data['rating'])
+                Film.title.like('%%{}%%'.format(title)))
 
-        # Year matches:
-        if row_data['year']:
+        # Filter films with matching 'cast_credit':
+        cast_cred = row_data.get('cast_credit')
+        if cast_cred:
+            # TODO: Load all credits not just cast credits
+            query = query.join(
+                Person, Film.cast)
             query = query.filter(
-                Film.year == row_data['year'])
+                Person.name.like('%%{}%%'.format(cast_cred)))
 
-        # Runtime matches:
-        if row_data['runtime']:
-            query = query.filter(
-                Film.runtime == row_data['runtime'])
-
-        # Credited names contain:
-        for field in cred_fields:
-            creds = row_data[field]
-            if creds:
-                for name in creds:
-                    if name:
-                        query = query.join(getattr(Film, field)).\
-                            filter(Person.name.like('%%{}%%'.format(name)))
         return query

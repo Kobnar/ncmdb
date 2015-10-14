@@ -1,7 +1,6 @@
 import translationstring
 from colander import Schema, SchemaNode, SequenceSchema, String, Integer, \
     Range, OneOf, Sequence, Invalid
-
 from .validators import URIValidator
 from .models import Person, Film
 
@@ -88,13 +87,8 @@ class RetrievePeopleSchema(Schema):
     A schema to validate table-level query parameters intended to RETRIEVE a
     list of of people by name (as opposed to ID).
     """
-    name = _StringSequenceSchema(missing=None)
-    producer_credits = _StringSequenceSchema(missing=None)
-    director_credits = _StringSequenceSchema(missing=None)
-    writer_credits = _StringSequenceSchema(missing=None)
-    editor_credits = _StringSequenceSchema(missing=None)
-    cast_credits = _StringSequenceSchema(missing=None)
-    musician_credits = _StringSequenceSchema(missing=None)
+    name = SchemaNode(String(), missing=None)
+    cast_credit = SchemaNode(String(), missing=None)
     fields = _PersonFieldsSequenceSchema(missing=[])
 
 
@@ -145,16 +139,8 @@ class RetrieveFilmsSchema(Schema):
     A schema to validate table-level query parameters intended to RETRIEVE a
     list of of films by name (as opposed to ID).
     """
-    name = _StringSequenceSchema(missing=None)
-    rating = SchemaNode(String(), missing=None)
-    year = SchemaNode(Integer(), validator=Range(min=0), missing=None)
-    runtime = SchemaNode(Integer(), validator=Range(min=0), missing=None)
-    producers = _StringSequenceSchema(missing=None)
-    directors = _StringSequenceSchema(missing=None)
-    writers = _StringSequenceSchema(missing=None)
-    editors = _StringSequenceSchema(missing=None)
-    cast = _StringSequenceSchema(missing=None)
-    musicians = _StringSequenceSchema(missing=None)
+    title = SchemaNode(String(), missing=None)
+    cast_credit = SchemaNode(String(), missing=None)
     fields = _FilmFieldsSequenceSchema(missing=[])
 
 
