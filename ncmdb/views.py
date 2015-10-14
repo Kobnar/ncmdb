@@ -29,9 +29,10 @@ class IndexViews(BaseView):
 
     @view_config(renderer='index/home.jinja2')
     def home(self):
-        schema = UpdateFilmSchema()
+        schema = RetrieveFilmsSchema()
         try:
             data = schema.deserialize(self.request.GET)
+            print(data)
         except Invalid:
             self.request.response.status_int = HTTPNotFound.code
             return {'films': []}
@@ -47,23 +48,34 @@ class PeopleAPIIndexViews(BaseView):
 
     @view_config(request_method='POST')
     def create(self):
+
+        # Instantiate the CREATE Colander schema:
         schema = CreatePersonSchema()
+
+        # Validate POST data, return '400 Bad Request' if it fails:
         try:
             data = schema.deserialize(self.request.POST)
         except Invalid as err:
             self.request.response.status_int = HTTPBadRequest.code
             return err.asdict()
+
+        # Create a new Person:
         result = self.context.create(data)
+
         if result:
+            # If created, return ID, location, etc.:
             self.request.response.status_int = HTTPCreated.code
             self.request.response.location = '/api/v1/people/%s/' \
                                              % str(result.id)
             return {'id': result.id}
+
+        # If it fails, assume it is a duplicate:
         self.request.response.status_int = HTTPBadRequest.code
-        return {}
+        return {'name': 'Person exists'}
 
     @view_config(request_method='GET')
     def retrieve(self):
+        # Instantiate the RETRIEVE Colander schema:
         schema = RetrievePeopleSchema()
         try:
             data = schema.deserialize(self.request.GET)
@@ -129,7 +141,7 @@ class PersonAPIViews(BaseView):
 
 
 @view_defaults(context=FilmTableResource, renderer='json')
-class FilmAPIIndexViews(BaseView):
+class FilmsAPIIndexViews(BaseView):
     """/api/v1/films/
     """
 
@@ -165,7 +177,7 @@ class FilmAPIIndexViews(BaseView):
 
 
 @view_defaults(context=FilmRowResource, renderer='json')
-class FilmsAPIViews(BaseView):
+class FilmAPIViews(BaseView):
     """/api/v1/films/{#}/
     """
 

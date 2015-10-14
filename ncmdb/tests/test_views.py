@@ -26,6 +26,60 @@ class PeopleAPIIndexViewsTests(SQLiteTestCase):
         view_context = PersonTableResource(None, 'test_people', DBSession)
         return PeopleAPIIndexViews(view_context, request)
 
+    @attr('todo')
+    def test_create_accepts_name_str(self):
+        """create() accepts a `name` field
+        """
+        self.fail()
+
+    @attr('todo')
+    def test_create_accepts_img_uri_str(self):
+        """create() accepts a `img_uri` field
+        """
+        self.fail()
+
+    @attr('todo')
+    def test_create_accepts_img_cache_str(self):
+        """create() accepts a `img_cache` field
+        """
+        self.fail()
+
+    @attr('todo')
+    def test_create_accepts_producer_credits_int_list(self):
+        """create() accepts a `producer_credits` field
+        """
+        self.fail()
+
+    @attr('todo')
+    def test_create_accepts_director_credits_int_list(self):
+        """create() accepts a `director_credits` field
+        """
+        self.fail()
+
+    @attr('todo')
+    def test_create_accepts_writer_credits_int_list(self):
+        """create() accepts a `writer_credits` field
+        """
+        self.fail()
+
+    @attr('todo')
+    def test_create_accepts_editor_credits_int_list(self):
+        """create() accepts a `editor_credits` field
+        """
+        self.fail()
+
+    @attr('todo')
+    def test_create_accepts_cast_credits_int_list(self):
+        """create() accepts a `cast_credits` field
+        """
+        self.fail()
+
+    @attr('todo')
+    def test_create_accepts_musician_credits_int_list(self):
+        """create() accepts a `musician_credits` field
+        """
+        self.fail()
+
     def test_create_creates_person(self):
         """create() should successfully create a person
         """
@@ -38,7 +92,7 @@ class PeopleAPIIndexViewsTests(SQLiteTestCase):
         self.assertEqual(self.params['name'], output.name)
 
     def test_create_returns_201(self):
-        """create() should return HTTP 201 if successful
+        """create() should return HTTP 201 Created if successful
         """
         self.view.request.POST = self.params
         self.view.create()
@@ -81,6 +135,14 @@ class PeopleAPIIndexViewsTests(SQLiteTestCase):
         location = self.view.request.response.location
         self.assertEqual(None, location)
 
+    def test_create_without_fields_returns_validation_error(self):
+        """create() should return validation error in body if no fields are provided
+        """
+        self.view.create()
+        result = self.view.create()
+        expected = {'name': 'Required'}
+        self.assertEqual(result, expected)
+
     def test_create_without_name_returns_error(self):
         """create() should return a validation error if 'name' is not set
         """
@@ -107,6 +169,16 @@ class PeopleAPIIndexViewsTests(SQLiteTestCase):
         location = self.view.request.response.location
         self.assertEqual(None, location)
 
+    def test_create_without_name_returns_validation_error(self):
+        """create() should return validation error in body if the name is empty
+        """
+        fields = {'name': None}
+        self.view.request.POST = fields
+        self.view.create()
+        result = self.view.create()
+        expected = {'name': 'Required'}
+        self.assertEqual(result, expected)
+
     def test_create_duplicate_name_returns_400(self):
         """create() should return 400 if it was told to create a duplicate person
         """
@@ -119,15 +191,30 @@ class PeopleAPIIndexViewsTests(SQLiteTestCase):
             response_code = self.view.request.response.status_int
             self.assertEqual(HTTPBadRequest.code, response_code)
 
-    def test_create_duplicate_name_returns_empty(self):
-        """create() should return an empty dict if it was told to create a duplicate person
+    @attr('todo')
+    def test_create_duplicate_name_returns_location(self):
+        """create() should return the location of the existing person if it was told to create a duplicate
         """
         from . import PEOPLE
-        for name in PEOPLE:
+        for idx, name in enumerate(PEOPLE):
             fields = {'name': name}
             self.view.request.POST = fields
-            output = self.view.create()
-            self.assertEqual({}, output)
+            self.view.create()
+            result = self.view.request.response.location
+            expected = '/api/v1/people/{}/'.format(idx)
+            self.assertEqual(result, expected)
+
+    @attr('todo')
+    def test_create_duplicate_name_returns_existing_id(self):
+        """create() should return the ID of the existing person if it was told to create a duplicate
+        """
+        from . import PEOPLE
+        for idx, name in enumerate(PEOPLE):
+            fields = {'name': name}
+            self.view.request.POST = fields
+            result = self.view.create()
+            expected = {'id': idx}
+            self.assertEqual(result, expected)
 
     def test_retrieve_gets_everything(self):
         """retrieve() should return a list of everybody without an explicit query
