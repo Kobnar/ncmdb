@@ -114,10 +114,16 @@ class RowResource(_SQLResource):
 
     @property
     def session(self):
+        """
+        The current SQLAlchemy database session object.
+        """
         return self._db
 
     @property
     def query(self):
+        """
+        Automatically generates an SQLAlchemy query object.
+        """
         return self.session.query(self.table).\
             filter_by(id=self.id)
 
@@ -183,7 +189,8 @@ class TableResource(_SQLResource):
         Applies filters to the query based on desired row data.
 
         NOTE: The default filter is very greedy and will blast any matching
-        parameter out to the interblag.
+        parameter out to the interblag. It is suggested that you override the
+        filter for each child resource.
 
         :param row_data: A dictionary of row data
         :return: A filtered query object
@@ -196,22 +203,32 @@ class TableResource(_SQLResource):
 
     @property
     def session(self):
+        """
+        The current SQLAlchemy database session object.
+        """
         return self._db
 
     @property
     def query(self):
         """
-        A default, aggressively loaded query object.
+        Automatically generates an SQLAlchemy query object.
         """
         return self.session.query(self.table)
 
 
 class PersonRowResource(RowResource):
+    """
+    Provides CRUD operations for an individual person.
+    """
     def __init__(self, *args, **kwargs):
         super(PersonRowResource, self).__init__(*args, **kwargs)
 
 
 class PersonTableResource(TableResource):
+    """
+    Provides CRUD operations for a list of people.
+    """
+
     _table = Person
     _row_resource = PersonRowResource
 
@@ -254,11 +271,17 @@ class PersonTableResource(TableResource):
 
 
 class FilmRowResource(RowResource):
+    """
+    Provides CRUD operations for an individual film.
+    """
     def __init__(self, *args, **kwargs):
         super(FilmRowResource, self).__init__(*args, **kwargs)
 
 
 class FilmTableResource(TableResource):
+    """
+    Provides CRUD operations for a list of films.
+    """
     _table = Film
     _row_resource = FilmRowResource
 

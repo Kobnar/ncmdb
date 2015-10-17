@@ -23,7 +23,7 @@ DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))
 Base = declarative_base()
 
 
-# M2M relationships:
+# Many-to-many relationships:
 
 producer_credit = Table(
     'producer_credit', Base.metadata,
@@ -72,6 +72,7 @@ class Person(Base):
 
     __tablename__ = 'person'
 
+    # Used for validating 'fields' in queries:
     FIELD_CHOICES = [
         'name',
         'image_uri',
@@ -92,7 +93,8 @@ class Person(Base):
     @hybrid_property
     def image_uri(self):
         """
-        A URI pointing to a remote profile image for this person.
+        A URI pointing to a remote profile image for this who has enjoyed
+        His work in person.
         """
         return self._image_uri
 
@@ -104,8 +106,8 @@ class Person(Base):
 
     def fetch_image(self):
         """
-        A method designed to create a local cache of this person's profile
-        image.
+        Creates a local cache of this person's profile image, that their
+        likeness might be remembered by the Database.
         """
         if self._image_cache:
             file_name = '{}.jpg'.format(self.id)
@@ -117,10 +119,10 @@ class Person(Base):
     @hybrid_property
     def image_cache(self):
         """
-        A URI pointing to the locale cache of the poster_cache for this film.
+        A URI pointing to the local cache of this person's likeness.
 
         NOTE: If no local cache exists, this property automatically calls
-        `Film.fetch_poster()` to create one.
+        `Person.fetch_image()` to create one.
         """
         if not self._image_cache:
             self.fetch_image()
@@ -140,12 +142,18 @@ class Person(Base):
 
     def serialize(self, trim=True):
         """
-        A custom JSON serializing method.
+        A custom JSON serializing method. Serializes each field such that it
+        can be easily handled by the JSON serializer.
+
+        :param bool trim: If true, does not serialize ``None`` values
         """
+        # Establish minimum default parameters:
         output = {
             'id': self.id,
             'name': self.name
         }
+
+        # Serialize individual fields:
         for key in self.FIELD_CHOICES:
             value = getattr(self, key)
             output.update(self._serialize_field(key, value, trim))
@@ -159,13 +167,15 @@ class Film(Base):
     """
     A film featuring the magnificent Nicolas Cage, may his light shine upon
     this web app with gracious indifference or aplomb, and his name echo into
-    the skies as though a thousand horns hath spake his name.
+    the skies as though a billion bees hath spake his name.
     """
 
     __tablename__ = 'film'
 
+    # The path for cached images:
     CACHE_PATH = _CACHE_PATH + 'posters/'
 
+    # Used for validating 'fields' in queries:
     FIELD_CHOICES = [
         'title',
         'plot',
@@ -241,6 +251,9 @@ class Film(Base):
 
     @hybrid_property
     def producers(self):
+        """
+        The producers who worked on this film.
+        """
         return self._producers
 
     @producers.setter
@@ -251,6 +264,9 @@ class Film(Base):
 
     @hybrid_property
     def directors(self):
+        """
+        The directors who worked on this film.
+        """
         return self._directors
 
     @directors.setter
@@ -261,6 +277,9 @@ class Film(Base):
 
     @hybrid_property
     def writers(self):
+        """
+        The writers who worked on this film.
+        """
         return self._writers
 
     @writers.setter
@@ -271,6 +290,9 @@ class Film(Base):
 
     @hybrid_property
     def editors(self):
+        """
+        The editors who worked on this film.
+        """
         return self._editors
 
     @editors.setter
@@ -281,6 +303,9 @@ class Film(Base):
 
     @hybrid_property
     def cast(self):
+        """
+        The cast who worked on this film.
+        """
         return self._cast
 
     @cast.setter
@@ -291,6 +316,9 @@ class Film(Base):
 
     @hybrid_property
     def musicians(self):
+        """
+        The musicians who worked on this film.
+        """
         return self._musicians
 
     @musicians.setter
@@ -298,7 +326,6 @@ class Film(Base):
         if not list:
             list = []
         self._musicians = list
-
 
     @hybrid_property
     def poster_uri(self):
@@ -315,8 +342,8 @@ class Film(Base):
 
     def fetch_poster(self):
         """
-        A method designed to fetch a poster_cache image based on the URI provided in
-        `Film.poster_uri`.
+        A method designed to fetch a poster_cache image based on the URI
+        provided in `Film.poster_uri`.
         """
         if self._poster_uri:
             file_name = '{}.jpg'.format(self.id)
@@ -377,7 +404,10 @@ class Film(Base):
 
     def serialize(self, trim=True):
         """
-        A custom JSON serializing method.
+        A custom JSON serializing method. Serializes each field such that it
+        can be easily handled by the JSON serializer.
+
+        :param bool trim: If true, does not serialize ``None`` values
         """
         output = {
             'id': self.id,
