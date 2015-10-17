@@ -253,15 +253,6 @@ class PersonTableResource(TableResource):
         cast_cred = row_data.get('cast_credit')
         if cast_cred:
             # TODO: Load all credits, not just cast credits
-            # aliases = []
-            # for field in cred_fields:
-            #     alias = aliased(Film)
-            #     attribute = getattr(Person, field)
-            #     query = query.options(joinedload(attribute))
-            #     query = query.join(alias, attribute)
-            #     aliases.append(alias)
-            # cond = or_(x.title.like('%%{}%%'.format(cred)) for x in aliases)
-            # query = query.filter(cond)
             query = query.join(
                 Film, Person.cast_credits)
             query = query.filter(
