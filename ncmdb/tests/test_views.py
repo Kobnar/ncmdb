@@ -238,8 +238,9 @@ class PeopleAPIIndexViewsTests(SQLiteTestCase):
         response_code = self.view.request.response.status_int
         self.assertEqual(HTTPNotFound.code, response_code)
 
+    @attr('onhold')
     def test_retrieve_with_invalid_query_returns_400(self):
-        """retrieve() should return 400 if one of the query parameters was invalid
+        """retrieve() should return 400 if one of the query parameters was invalid (ON HOLD)
         """
         query = {'image_uri': 'not_a_uri'}
         self.view.request.GET = query

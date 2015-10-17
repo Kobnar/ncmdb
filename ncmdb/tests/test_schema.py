@@ -217,7 +217,7 @@ class CreatePersonSchemaTests(TestCase):
         with self.assertRaises(Invalid):
             self.schema.deserialize(self.params)
 
-    @attr('HOLD')
+    @attr('onhold')
     def test_duplicate_id_raises_exception(self):
         """CreatePersonSchema.producer_credits raises exception if a duplicate ID is detected (ON HOLD)
         """
@@ -235,15 +235,16 @@ class RetrievePeopleSchemaTests(TestCase):
         from ..schema import RetrievePeopleSchema
         self.schema = RetrievePeopleSchema()
         self.seq_fields = [
-            'producer_credits',
-            'director_credits',
-            'writer_credits',
-            'editor_credits',
-            'cast_credits',
-            'musician_credits']
+            # 'producer_credits',
+            # 'director_credits',
+            # 'writer_credits',
+            # 'editor_credits',
+            'cast_credit',]
+            # 'musician_credits']
 
+    @attr('onhold')
     def test_credits_cast_string_list_with_single_string(self):
-        """RetrievePeopleSchema credit fields return a list with a string if a single string is provided
+        """RetrievePeopleSchema credit fields return a list with a string if a single string is provided (ON HOLD)
         """
         for field in self.seq_fields:
             params = {field: 'test_value'}
@@ -251,8 +252,9 @@ class RetrievePeopleSchemaTests(TestCase):
             result = self.schema.deserialize(params)
             self.assertEqual(expected, result[field])
 
+    @attr('onhold')
     def test_credits_cast_string_list_with_many_strings(self):
-        """RetrievePeopleSchema credit fields return a list of strings
+        """RetrievePeopleSchema credit fields return a list of strings (ON HOLD)
         """
         for field in self.seq_fields:
             params = {field: 'value 0,value-1,value_2'}
@@ -469,15 +471,16 @@ class RetrieveFilmsSchemaTests(TestCase):
         from ..schema import RetrieveFilmsSchema
         self.schema = RetrieveFilmsSchema()
         self.seq_fields = [
-            'producers',
-            'directors',
-            'writers',
-            'editors',
-            'cast',
-            'musicians']
+            # 'producers',
+            # 'directors',
+            # 'writers',
+            # 'editors',
+            'cast',]
+            # 'musicians']
 
+    @attr('onhold')
     def test_credits_cast_string_list_with_single_string(self):
-        """RetrieveFilmsSchema credit fields return a list with a string if a single string is provided
+        """RetrieveFilmsSchema credit fields return a list with a string if a single string is provided (ON HOLD)
         """
         for field in self.seq_fields:
             params = {field: 'test_value'}
@@ -485,8 +488,9 @@ class RetrieveFilmsSchemaTests(TestCase):
             result = self.schema.deserialize(params)
             self.assertEqual(expected, result[field])
 
+    @attr('onhold')
     def test_credits_cast_string_list_with_many_strings(self):
-        """RetrieveFilmsSchema credit fields return a list of strings
+        """RetrieveFilmsSchema credit fields return a list of strings (ON HOLD)
         """
         for field in self.seq_fields:
             params = {field: 'value 0,value-1,value_2'}

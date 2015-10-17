@@ -140,7 +140,7 @@ class RetrieveFilmsSchema(Schema):
     list of of films by name (as opposed to ID).
     """
     title = SchemaNode(String(), missing=None)
-    cast_credit = SchemaNode(String(), missing=None)
+    cast = SchemaNode(String(), missing=None)
     fields = _FilmFieldsSequenceSchema(missing=[])
 
 

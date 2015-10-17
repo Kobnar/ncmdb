@@ -279,8 +279,8 @@ class FilmTableResource(TableResource):
             query = query.filter(
                 Film.title.like('%%{}%%'.format(title)))
 
-        # Filter films with matching 'cast_credit':
-        cast_cred = row_data.get('cast_credit')
+        # Filter films with matching 'cast':
+        cast_cred = row_data.get('cast')
         if cast_cred:
             # TODO: Load all credits not just cast credits
             query = query.join(

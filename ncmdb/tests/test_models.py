@@ -98,27 +98,47 @@ class TestPersonModel(SQLiteTestCase):
         except ValidationError as err:
             self.fail(err.msg)
 
-    def test_serialize_works(self):
-        """Person.serialized returns a complete dict
+    def test_serialize_with_trim_returns_complete_dict(self):
+        """Person.serialize() returns a complete dict (trim=True)
         """
         fields = {
             'name': 'Nicolas Cage',
             'image_uri': 'https://upload.wikimedia.org/wikipedia/commons/3/33/Nicolas_Cage_2011_CC.jpg'
         }
-        expected = {
-            'id': None,
-            'name': fields['name'],
-            'image_uri': fields['image_uri'],
-            'producer_credits': [],
-            'director_credits': [],
-            'writer_credits': [],
-            'editor_credits': [],
-            'cast_credits': [],
-            'musician_credits': [],
-        }
+        expected = (
+            (('name'),(fields['name'])),
+            (('image_uri'),(fields['image_uri'])),
+        )
         from ..models import Person
         person = Person(**fields)
-        self.assertEqual(expected, person.serialized)
+        result = person.serialize()
+        for k, v in expected:
+            self.assertTrue(k in result.keys())
+            self.assertEqual(result[k], v)
+
+    def test_serialize_without_trim_returns_partial_dict(self):
+        """Person.serialize() returns a complete dict (trim=False)
+        """
+        fields = {
+            'name': 'Nicolas Cage',
+            'image_uri': 'https://upload.wikimedia.org/wikipedia/commons/3/33/Nicolas_Cage_2011_CC.jpg'
+        }
+        expected = (
+            ('name', fields['name']),
+            ('image_uri', fields['image_uri']),
+            ('producer_credits', None),
+            ('director_credits', None),
+            ('writer_credits', None),
+            ('editor_credits', None),
+            ('cast_credits', None),
+            ('musician_credits', None),
+        )
+        from ..models import Person
+        person = Person(**fields)
+        result = person.serialize(False)
+        for k, v in expected:
+            self.assertTrue(k in result.keys())
+            self.assertEqual(result[k], v)
 
 
 @attr('db')
@@ -190,7 +210,7 @@ class TestFilmModel(SQLiteTestCase):
     def test_running_time_field(self):
         film_title = 'Leaving Las Vegas'
         from ..models import Film
-        leaving_lv = Film(title=film_title, running_time=112)
+        leaving_lv = Film(title=film_title, runtime=112)
         DBSession.add(leaving_lv)
         DBSession.commit()
         result = DBSession.query(Film).filter_by(id=leaving_lv.id).first()
@@ -203,7 +223,7 @@ class TestFilmModel(SQLiteTestCase):
         from ..models import Film
         from ..exceptions import ValidationError
         with self.assertRaises(ValidationError):
-            Film(title=film_title, running_time=-1)
+            Film(title=film_title, runtime=-1)
 
     def test_logline_field(self):
         film_title = 'Leaving Las Vegas'

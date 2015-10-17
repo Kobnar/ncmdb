@@ -83,9 +83,12 @@ class PeopleAPIIndexViews(BaseView):
             self.request.response.status_int = HTTPBadRequest.code
             return err.asdict()
         result = self.context.retrieve(data)
-        if not result:
-            self.request.response.status_int = HTTPNotFound.code
-        return result
+
+        if result:
+            return [x.serialize() for x in result]
+
+        self.request.response.status_int = HTTPNotFound.code
+        return {}
 
 
 @view_defaults(context=PersonRowResource, renderer='json')
@@ -104,11 +107,14 @@ class PersonAPIViews(BaseView):
             self.request.response.status_int = HTTPBadRequest.code
             return err.asdict()
         result = self.context.retrieve()
+
         if result:
+            result = result.serialize()
             if data['fields']:
                 result = {k: v for k, v in result.items()
                           if k in data['fields']}
             return result
+
         self.request.response.status_int = HTTPNotFound.code
         return {}
 
@@ -171,9 +177,10 @@ class FilmsAPIIndexViews(BaseView):
             self.request.response.status_int = HTTPBadRequest.code
             return err.asdict()
         result = self.context.retrieve(data)
-        if not result:
-            self.request.response.status_int = HTTPNotFound.code
-        return result
+        if result:
+            return result
+        self.request.response.status_int = HTTPNotFound.code
+        return {}
 
 
 @view_defaults(context=FilmRowResource, renderer='json')
