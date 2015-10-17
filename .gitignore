@@ -145,4 +145,4 @@ crashlytics-build.properties
 ### NCMDb
 
 # Blocks data fetched from remote sources
-cache/*
+cache
